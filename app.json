@@ -20,7 +20,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.jhon_steven_23.ProyectoDeficienciasViales"
+      "package": "com.jhon_steven_23.DeficienciasVialesJhonn"
     },
     "web": {
       "output": "static",
