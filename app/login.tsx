@@ -1,30 +1,31 @@
-// Ejemplo: app/login.tsx
-import { useRouter } from 'expo-router';
+import { onGoogleButtonPress, onSignOut } from '@/services/auth';
 import React from 'react';
-import { Alert, Button, StyleSheet, View } from 'react-native';
-import { onGoogleButtonPress } from '../services/auth'; // Importamos nuestra función
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
-  const router = useRouter();
-
   const handleLogin = async () => {
     const user = await onGoogleButtonPress();
     if (user) {
-      // ¡Éxito! Navegamos al home
-      // Asumiendo que tu layout de tabs está en (tabs)
-      router.replace('/(tabs)'); 
-    } else {
-      // Falló
-      Alert.alert("Error", "No se pudo iniciar sesión con Google.");
+      console.log('Sesión iniciada con:', user.email);
     }
+  };
+
+  const handleLogout = async () => {
+    await onSignOut();
+    console.log('Sesión cerrada correctamente');
   };
 
   return (
     <View style={styles.container}>
-      <Button
-        title="Iniciar sesión con Google"
-        onPress={handleLogin}
-      />
+      <Text style={styles.title}>Bienvenido</Text>
+
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Cerrar sesión</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -34,5 +35,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 20,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 40,
+  },
+  loginButton: {
+    backgroundColor: '#4285F4',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  logoutButton: {
+    backgroundColor: '#DB4437',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
