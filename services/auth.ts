@@ -1,13 +1,40 @@
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import { FIREBASE_AUTH } from './firebase';
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { FIREBASE_AUTH, FIREBASE_DB } from './firebase';
 
 GoogleSignin.configure({
-  webClientId: '910577145779-n0skoesjgdunh1i3qb1uevr7u4n6mpmu.apps.googleusercontent.com',
+  webClientId: '910577145779-4l9n7vb9m1h8odbjt6i1adrfq728ubt7.apps.googleusercontent.com',
 });
+
+const createUserProfile = async (user: any) => {
+  const userDocRef = doc(FIREBASE_DB, "users", user.uid);
+  const docSnap = await getDoc(userDocRef);
+
+  if (!docSnap.exists()) {
+    console.log("Creando perfil para nuevo usuario...");
+    try {
+      await setDoc(userDocRef, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        role: "usuario", 
+        createdAt: serverTimestamp() 
+      });
+      console.log("¡Perfil creado en Firestore!");
+    } catch (error) {
+      console.error("Error al crear el perfil de usuario:", error);
+    }
+  } else {
+    console.log("El usuario ya tiene un perfil en Firestore.");
+  }
+}
 
 export const onGoogleButtonPress = async () => {
   try {
+    await GoogleSignin.signOut();
+    await FIREBASE_AUTH.signOut();
     await GoogleSignin.hasPlayServices();
     const userInfo = await GoogleSignin.signIn();
     console.log("Información del Usuario de Google:", JSON.stringify(userInfo, null, 2));
@@ -20,7 +47,10 @@ export const onGoogleButtonPress = async () => {
 
     const googleCredential = GoogleAuthProvider.credential(idToken);
     const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
-    console.log("¡Usuario logueado!", userCredential.user);
+    console.log("¡Usuario logueado en Firebase Auth!", userCredential.user);
+
+    await createUserProfile(userCredential.user);
+
     return userCredential.user;
 
   } catch (error: any) {
