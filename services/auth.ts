@@ -7,25 +7,25 @@ import { FIREBASE_AUTH } from './firebase';
 // Recuerda que este ID de Cliente Web lo obtuvimos en la Fase 1
 // Es el ID de la "Aplicación Web" de Google Cloud
 GoogleSignin.configure({
-  webClientId: 'T910577145779-n0skoesjgdunh1i3qb1uevr7u4n6mpmu.apps.googleusercontent.com',
+  webClientId: '910577145779-n0skoesjgdunh1i3qb1uevr7u4n6mpmu.apps.googleusercontent.com',
 });
 
 // 2. Función para Iniciar Sesión
 export const onGoogleButtonPress = async () => {
   try {
-    // Verificar que Google Play Services esté disponible
     await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    console.log("Información del Usuario de Google:", JSON.stringify(userInfo, null, 2));
 
-    // Obtener el idToken del usuario (esto muestra el pop-up nativo)
-    const { idToken } = await GoogleSignin.signIn();
+    // Compatibilidad: el idToken puede venir en userInfo.data.idToken o en userInfo.idToken
+    const idToken = (userInfo as any)?.data?.idToken ?? (userInfo as any)?.idToken;
 
-    // Crear una credencial de Firebase con el idToken
+    if (!idToken) {
+      throw new Error("Error: No se recibió idToken de Google. Revisa tu configuración.");
+    }
+
     const googleCredential = GoogleAuthProvider.credential(idToken);
-
-    // Iniciar sesión en Firebase con la credencial
     const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
-
-    // ¡Éxito! El usuario está logueado en Firebase
     console.log("¡Usuario logueado!", userCredential.user);
     return userCredential.user;
 
