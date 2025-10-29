@@ -5,11 +5,11 @@ import React from 'react';
 import { ActivityIndicator, Button, Image, StyleSheet, Text, View } from 'react-native';
 
 export default function PerfilScreen() {
-  const { profile, isLoading } = useAuth(); 
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await onSignOut();
+  const { profile, isLoading } = useAuth();
+  const router = useRouter(); 
+  const handleLogout = () => {
+    router.replace('/'); 
+    onSignOut();
   };
 
   if (isLoading) {
@@ -21,11 +21,8 @@ export default function PerfilScreen() {
       {profile?.photoURL && (
         <Image source={{ uri: profile.photoURL }} style={styles.image} />
       )}
-
       <Text style={styles.title}>{profile?.displayName}</Text>
-
       <Text style={styles.email}>{profile?.email}</Text>
-
       <Text style={styles.role}>Rol: {profile?.role}</Text>
       
       <Button title="Cerrar Sesión" onPress={handleLogout} color="red" />

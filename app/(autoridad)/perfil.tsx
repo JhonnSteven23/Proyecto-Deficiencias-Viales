@@ -1,30 +1,60 @@
+import { useAuth } from '@/context/AuthContext';
+import { onSignOut } from '@/services/auth';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Button, Image, StyleSheet, Text, View } from 'react-native';
 
-export default function App() {
-  const handlePress = () => {
-    alert('¡Hola desde React Native!');
+export default function PerfilScreen() {
+  const { profile, isLoading } = useAuth();
+  const router = useRouter(); 
+  const handleLogout = () => {
+    router.replace('/'); 
+    onSignOut();
   };
+
+  if (isLoading) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Perfil</Text>
-      <Button title="Presióname" onPress={handlePress} />
+      {profile?.photoURL && (
+        <Image source={{ uri: profile.photoURL }} style={styles.image} />
+      )}
+      <Text style={styles.title}>{profile?.displayName}</Text>
+      <Text style={styles.email}>{profile?.email}</Text>
+      <Text style={styles.role}>Rol: {profile?.role}</Text>
+      
+      <Button title="Cerrar Sesión" onPress={handleLogout} color="red" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,              // Ocupa toda la pantalla
-    justifyContent: 'center', // Centra verticalmente
-    alignItems: 'center',     // Centra horizontalmente
-    backgroundColor: '#f2f2f2',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
+  },
+  email: {
+    fontSize: 16,
+    color: 'gray',
+    marginBottom: 10,
+  },
+  role: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    marginBottom: 40,
   },
 });
