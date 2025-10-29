@@ -1,49 +1,25 @@
-import { onGoogleButtonPress, onSignOut } from '@/services/auth';
-import { useRouter } from 'expo-router';
+import { onGoogleButtonPress } from '@/services/auth';
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
-  const router = useRouter();
   const handleLogin = async () => {
     const profile = await onGoogleButtonPress(); 
     
-    if (profile) {
-      console.log('Sesión iniciada con:', profile.email);
-      console.log('Rol del usuario:', profile.role);
-
-      if (profile.role === 'admin') {
-        router.replace('/(admin)');
-      } else if (profile.role === 'autoridad') {
-        router.replace('/(autoridad)');
-      } else {
-        router.replace('/(tabs)'); 
-      }
-
-    } else {
+    if (!profile) {
       Alert.alert("Error", "No se pudo iniciar sesión.");
     }
   };
-
-  const handleLogout = async () => {
-    await onSignOut();
-    console.log('Sesión cerrada correctamente');
-    router.replace('/login');
-  };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bienvenido</Text>
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Cerrar sesión</Text>
-      </TouchableOpacity>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
