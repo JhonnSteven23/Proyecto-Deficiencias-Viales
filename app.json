@@ -21,7 +21,17 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.jhon_steven_23.DeficienciasVialesJhonn",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBkbBrZ7ByvWL6eSKRfybLzDekIco2pb94"  
+        }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -41,7 +51,13 @@
           }
         }
       ],
-      "@react-native-google-signin/google-signin" 
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permite que la aplicación acceda a tu ubicación para mostrarla en el mapa y reportar deficiencias."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
