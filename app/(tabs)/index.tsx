@@ -1,17 +1,14 @@
-import { StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Button } from 'react-native';
 
 export default function HomeScreen() {
+  const router = useRouter();
+
+  const iniciarReporte = () => {
+    router.push('/(reporte)/reporte1'); 
+  };
+
   return (
-    <View style={styles.container}>
-    </View>
+    <Button title="Reportar una deficiencia" onPress={iniciarReporte} />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-});
