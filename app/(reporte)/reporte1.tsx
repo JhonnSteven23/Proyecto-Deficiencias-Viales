@@ -30,7 +30,7 @@ export default function TipoReporteScreen() {
         style={[styles.option, selected === 'Bache' && styles.selected]}
         onPress={() => handleSelect('Bache')}
       >
-        <Image source={require('../../assets/images/bache.png')} style={styles.icon} /> 
+        <Image source={require('../../assets/images/ReporteBache.png')} style={styles.icon} /> 
         <Text>Bache</Text>
       </TouchableOpacity>
 
@@ -38,7 +38,7 @@ export default function TipoReporteScreen() {
         style={[styles.option, selected === 'Alcantarilla' && styles.selected]}
         onPress={() => handleSelect('Alcantarilla')}
       >
-        <Image source={require('../../assets/images/alcantarilla.png')} style={styles.icon} />
+        <Image source={require('../../assets/images/ReporteAlcantarilla.png')} style={styles.icon} />
         <Text>Alcantarilla tapada</Text>
       </TouchableOpacity>
 
@@ -46,7 +46,7 @@ export default function TipoReporteScreen() {
         style={[styles.option, selected === 'Poste' && styles.selected]}
         onPress={() => handleSelect('Poste')}
       >
-        <Image source={require('../../assets/images/poste.png')} style={styles.icon} />
+        <Image source={require('../../assets/images/ReportePoste.png')} style={styles.icon} />
         <Text>Poste dañado</Text>
       </TouchableOpacity>
 
