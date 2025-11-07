@@ -19,6 +19,8 @@ const createUserProfile = async (user: any): Promise<any> => {
       displayName: user.displayName,
       photoURL: user.photoURL,
       role: "usuario", 
+      "pushToken": "ExponentPushToken[...]",
+      "especialidad": null,
       createdAt: serverTimestamp() 
     };
     
