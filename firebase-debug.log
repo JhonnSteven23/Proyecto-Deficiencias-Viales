@@ -1,0 +1,409 @@
+[debug] [2025-11-07T02:22:32.755Z] ----------------------------------------------------------------------
+[debug] [2025-11-07T02:22:32.759Z] Command:       C:\nvm4w\nodejs\node.exe C:\Users\pepep\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2025-11-07T02:22:32.760Z] CLI Version:   14.24.0
+[debug] [2025-11-07T02:22:32.761Z] Platform:      win32
+[debug] [2025-11-07T02:22:32.761Z] Node Version:  v20.19.5
+[debug] [2025-11-07T02:22:32.761Z] Time:          Thu Nov 06 2025 22:22:32 GMT-0400 (hora de Bolivia)
+[debug] [2025-11-07T02:22:32.762Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-11-07T02:22:33.158Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-07T02:22:33.159Z] > authorizing via signed-in user (stevenjhon222@gmail.com)
+[debug] [2025-11-07T02:22:33.159Z] [iam] checking project deficiencias-viales-jhonn for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-11-07T02:22:33.161Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:33.162Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:33.163Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions [none]
+[debug] [2025-11-07T02:22:33.164Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions x-goog-quota-user=projects/deficiencias-viales-jhonn
+[debug] [2025-11-07T02:22:33.164Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-11-07T02:22:34.306Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions 200
+[debug] [2025-11-07T02:22:34.307Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-11-07T02:22:34.307Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:34.307Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:34.308Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/deficiencias-viales-jhonn/serviceAccounts/deficiencias-viales-jhonn@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-11-07T02:22:34.308Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/deficiencias-viales-jhonn/serviceAccounts/deficiencias-viales-jhonn@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-11-07T02:22:35.656Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/deficiencias-viales-jhonn/serviceAccounts/deficiencias-viales-jhonn@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-11-07T02:22:35.657Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/deficiencias-viales-jhonn/serviceAccounts/deficiencias-viales-jhonn@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'deficiencias-viales-jhonn'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run lint
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2025-11-07T02:22:53.665Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:53.665Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:53.666Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn [none]
+[debug] [2025-11-07T02:22:55.015Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn 200
+[debug] [2025-11-07T02:22:55.015Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn {"projectNumber":"910577145779","projectId":"deficiencias-viales-jhonn","lifecycleState":"ACTIVE","name":"Deficiencias-Viales-Jhonn","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-10-24T01:03:35.669642Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-11-07T02:22:55.020Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:55.020Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:22:55.020Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/deficiencias-viales-jhonn/adminSdkConfig [none]
+[debug] [2025-11-07T02:22:55.639Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/deficiencias-viales-jhonn/adminSdkConfig 200
+[debug] [2025-11-07T02:22:55.640Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/deficiencias-viales-jhonn/adminSdkConfig {"projectId":"deficiencias-viales-jhonn","storageBucket":"deficiencias-viales-jhonn.firebasestorage.app"}
+[debug] [2025-11-07T02:22:55.642Z] Validating nodejs source
+[debug] [2025-11-07T02:22:57.325Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "expo-server-sdk": "^4.0.0",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.0.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.9.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.25.4",
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^5.7.3"
+  },
+  "private": true
+}
+[debug] [2025-11-07T02:22:57.326Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-11-07T02:22:57.328Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-11-07T02:22:57.353Z] Found firebase-functions binary at 'C:\PROGRAMAS\ProyectoGrado\Proyecto-Deficiencias-Viales\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8574
+
+[debug] [2025-11-07T02:22:58.288Z] Got response from /__/functions.yaml {"endpoints":{"notificarAutoridadNuevoReporte":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"reportes/{reporteId}"},"retry":false},"entryPoint":"notificarAutoridadNuevoReporte"},"notificarUsuarioCambioEstado":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.updated","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"reportes/{reporteId}"},"retry":false},"entryPoint":"notificarUsuarioCambioEstado"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled... 
+[debug] [2025-11-07T02:23:02.339Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-11-07T02:23:02.339Z] > authorizing via signed-in user (stevenjhon222@gmail.com)
+[debug] [2025-11-07T02:23:02.339Z] [iam] checking project deficiencias-viales-jhonn for permissions ["firebase.projects.get","firebaseextensions.instances.list"]
+[debug] [2025-11-07T02:23:02.339Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:02.339Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:02.339Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions [none]
+[debug] [2025-11-07T02:23:02.340Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions x-goog-quota-user=projects/deficiencias-viales-jhonn
+[debug] [2025-11-07T02:23:02.340Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-11-07T02:23:03.384Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions 200
+[debug] [2025-11-07T02:23:03.384Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-11-07T02:23:03.385Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:03.385Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:03.386Z] >>> [apiv2][query] GET https://firebaseextensions.googleapis.com/v1beta/projects/deficiencias-viales-jhonn/instances pageSize=100&pageToken=
+[debug] [2025-11-07T02:23:04.909Z] <<< [apiv2][status] GET https://firebaseextensions.googleapis.com/v1beta/projects/deficiencias-viales-jhonn/instances 200
+[debug] [2025-11-07T02:23:04.910Z] <<< [apiv2][body] GET https://firebaseextensions.googleapis.com/v1beta/projects/deficiencias-viales-jhonn/instances {}
+[info] i  functions: preparing functions directory for uploading... 
+[info] i  functions: packaged C:\PROGRAMAS\ProyectoGrado\Proyecto-Deficiencias-Viales\functions (98.86 KB) for uploading 
+[debug] [2025-11-07T02:23:05.006Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:05.007Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:05.007Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/deficiencias-viales-jhonn/locations/-/functions [none]
+[debug] [2025-11-07T02:23:06.158Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/deficiencias-viales-jhonn/locations/-/functions 200
+[debug] [2025-11-07T02:23:06.158Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/deficiencias-viales-jhonn/locations/-/functions {}
+[debug] [2025-11-07T02:23:06.158Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:06.158Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:06.159Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2025-11-07T02:23:07.430Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/-/functions 200
+[debug] [2025-11-07T02:23:07.430Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/-/functions {"functions":[{"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","buildConfig":{"build":"projects/910577145779/locations/southamerica-east1/builds/cf68ca67-feaa-439f-a0d6-1fbf5fd83abf","runtime":"nodejs20","entryPoint":"helloWorld","source":{"storageSource":{"bucket":"gcf-v2-sources-910577145779-southamerica-east1","object":"helloWorld/function-source.zip","generation":"1762481843141100"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-910577145779-southamerica-east1","object":"helloWorld/function-source.zip","generation":"1762481843141100"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/deficiencias-viales-jhonn/serviceAccounts/910577145779-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/helloworld","timeoutSeconds":60,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"deficiencias-viales-jhonn\",\"storageBucket\":\"deficiencias-viales-jhonn.firebasestorage.app\"}","GCLOUD_PROJECT":"deficiencias-viales-jhonn","EVENTARC_CLOUD_EVENT_SOURCE":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/helloWorld","FUNCTION_TARGET":"helloWorld","LOG_EXECUTION_ID":"true"},"maxInstanceCount":20,"ingressSettings":"ALLOW_ALL","uri":"https://helloworld-mwuhzkk36q-rj.a.run.app","serviceAccountEmail":"910577145779-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"helloworld-00001-mij","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2025-11-07T02:18:51.814332433Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"29f9dda8995c331a18be0416cd6f05c7ba64357e"},"environment":"GEN_2","url":"https://southamerica-east1-deficiencias-viales-jhonn.cloudfunctions.net/helloWorld","satisfiesPzs":true,"createTime":"2025-11-07T02:17:23.778473351Z","satisfiesPzi":true}]}
+[debug] [2025-11-07T02:23:07.432Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:07.432Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:07.432Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/deficiencias-viales-jhonn/databases/(default) [none]
+[debug] [2025-11-07T02:23:07.795Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/deficiencias-viales-jhonn/databases/(default) 200
+[debug] [2025-11-07T02:23:07.795Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/deficiencias-viales-jhonn/databases/(default) {"name":"projects/deficiencias-viales-jhonn/databases/(default)","uid":"c4bf0726-24d5-42da-833b-d2fb0ce5f6f1","createTime":"2025-10-25T00:32:57.043531Z","updateTime":"2025-10-25T00:32:57.043531Z","locationId":"southamerica-west1","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2025-11-07T01:23:08.136747Z","appEngineIntegrationMode":"DISABLED","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IOvd/OX93pADMIbOxK+5v5AD"}
+[info] i  functions: ensuring required API run.googleapis.com is enabled... 
+[info] i  functions: ensuring required API eventarc.googleapis.com is enabled... 
+[info] i  functions: ensuring required API pubsub.googleapis.com is enabled... 
+[info] i  functions: ensuring required API storage.googleapis.com is enabled... 
+[info] i  functions: generating the service identity for pubsub.googleapis.com... 
+[debug] [2025-11-07T02:23:07.801Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:07.801Z] Checked if tokens are valid: true, expires at: 1762483400431
+[info] i  functions: generating the service identity for eventarc.googleapis.com... 
+[debug] [2025-11-07T02:23:07.802Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:07.802Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:07.802Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/pubsub.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-11-07T02:23:07.802Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/pubsub.googleapis.com:generateServiceIdentity x-goog-quota-user=projects/910577145779
+[debug] [2025-11-07T02:23:07.802Z] >>> [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/pubsub.googleapis.com:generateServiceIdentity {}
+[debug] [2025-11-07T02:23:07.804Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/eventarc.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-11-07T02:23:07.804Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/eventarc.googleapis.com:generateServiceIdentity x-goog-quota-user=projects/910577145779
+[debug] [2025-11-07T02:23:07.804Z] >>> [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/eventarc.googleapis.com:generateServiceIdentity {}
+[debug] [2025-11-07T02:23:09.097Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/pubsub.googleapis.com:generateServiceIdentity 200
+[debug] [2025-11-07T02:23:09.097Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/pubsub.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-910577145779@gcp-sa-pubsub.iam.gserviceaccount.com","uniqueId":"115974432123253270200"}}
+[debug] [2025-11-07T02:23:09.199Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/eventarc.googleapis.com:generateServiceIdentity 200
+[debug] [2025-11-07T02:23:09.199Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/910577145779/services/eventarc.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-910577145779@gcp-sa-eventarc.iam.gserviceaccount.com","uniqueId":"107872705639000241190"}}
+[debug] [2025-11-07T02:23:09.202Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:09.202Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:09.203Z] >>> [apiv2][query] GET https://compute.googleapis.com/compute/v1/projects/910577145779 [none]
+[debug] [2025-11-07T02:23:09.661Z] <<< [apiv2][status] GET https://compute.googleapis.com/compute/v1/projects/910577145779 403
+[debug] [2025-11-07T02:23:09.662Z] <<< [apiv2][body] GET https://compute.googleapis.com/compute/v1/projects/910577145779 {"error":{"code":403,"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"serviceTitle":"Compute Engine API","activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779","service":"compute.googleapis.com","containerInfo":"910577145779","consumer":"projects/910577145779"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779"}]}]}}
+[debug] [2025-11-07T02:23:09.662Z] unable to look up default compute service account. Falling back to 910577145779-compute@developer.gserviceaccount.com. Error: {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":403,"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"serviceTitle":"Compute Engine API","activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779","service":"compute.googleapis.com","containerInfo":"910577145779","consumer":"projects/910577145779"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779"}]}]}},"response":{"statusCode":403}},"exit":1,"message":"Request to https://compute.googleapis.com/compute/v1/projects/910577145779 had HTTP Error: 403, Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","status":403}
+[debug] [2025-11-07T02:23:09.663Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:09.663Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:09.663Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/910577145779:getIamPolicy [none]
+[debug] [2025-11-07T02:23:11.107Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/910577145779:getIamPolicy 200
+[debug] [2025-11-07T02:23:11.107Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/910577145779:getIamPolicy {"version":1,"etag":"BwZC98hRVmg=","bindings":[{"role":"roles/artifactregistry.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-artifactregistry.iam.gserviceaccount.com"]},{"role":"roles/cloudbuild.builds.builder","members":["serviceAccount:910577145779@cloudbuild.gserviceaccount.com"]},{"role":"roles/cloudbuild.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-cloudbuild.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.serviceAgent","members":["serviceAccount:service-910577145779@gcf-admin-robot.iam.gserviceaccount.com"]},{"role":"roles/containerregistry.ServiceAgent","members":["serviceAccount:service-910577145779@containerregistry.iam.gserviceaccount.com"]},{"role":"roles/editor","members":["serviceAccount:910577145779-compute@developer.gserviceaccount.com","serviceAccount:910577145779@cloudservices.gserviceaccount.com","serviceAccount:deficiencias-viales-jhonn@appspot.gserviceaccount.com"]},{"role":"roles/firebase.managementServiceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebase.iam.gserviceaccount.com"]},{"role":"roles/firebase.sdkAdminServiceAgent","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/firebaseauth.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/firebasemods.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebasemods.iam.gserviceaccount.com"]},{"role":"roles/firebaserules.system","members":["serviceAccount:service-910577145779@firebase-rules.iam.gserviceaccount.com"]},{"role":"roles/firebasestorage.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebasestorage.iam.gserviceaccount.com"]},{"role":"roles/firestore.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firestore.iam.gserviceaccount.com"]},{"role":"roles/iam.serviceAccountTokenCreator","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/owner","members":["user:StevenJhon222@gmail.com"]},{"role":"roles/run.serviceAgent","members":["serviceAccount:service-910577145779@serverless-robot-prod.iam.gserviceaccount.com"]},{"role":"roles/storage.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]}]}
+[debug] [2025-11-07T02:23:11.108Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:11.108Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:11.108Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/910577145779:setIamPolicy [none]
+[debug] [2025-11-07T02:23:11.108Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/910577145779:setIamPolicy {"policy":{"version":1,"etag":"BwZC98hRVmg=","bindings":[{"role":"roles/artifactregistry.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-artifactregistry.iam.gserviceaccount.com"]},{"role":"roles/cloudbuild.builds.builder","members":["serviceAccount:910577145779@cloudbuild.gserviceaccount.com"]},{"role":"roles/cloudbuild.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-cloudbuild.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.serviceAgent","members":["serviceAccount:service-910577145779@gcf-admin-robot.iam.gserviceaccount.com"]},{"role":"roles/containerregistry.ServiceAgent","members":["serviceAccount:service-910577145779@containerregistry.iam.gserviceaccount.com"]},{"role":"roles/editor","members":["serviceAccount:910577145779-compute@developer.gserviceaccount.com","serviceAccount:910577145779@cloudservices.gserviceaccount.com","serviceAccount:deficiencias-viales-jhonn@appspot.gserviceaccount.com"]},{"role":"roles/firebase.managementServiceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebase.iam.gserviceaccount.com"]},{"role":"roles/firebase.sdkAdminServiceAgent","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/firebaseauth.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/firebasemods.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebasemods.iam.gserviceaccount.com"]},{"role":"roles/firebaserules.system","members":["serviceAccount:service-910577145779@firebase-rules.iam.gserviceaccount.com"]},{"role":"roles/firebasestorage.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebasestorage.iam.gserviceaccount.com"]},{"role":"roles/firestore.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firestore.iam.gserviceaccount.com"]},{"role":"roles/iam.serviceAccountTokenCreator","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com","serviceAccount:service-910577145779@gcp-sa-pubsub.iam.gserviceaccount.com"]},{"role":"roles/owner","members":["user:StevenJhon222@gmail.com"]},{"role":"roles/run.serviceAgent","members":["serviceAccount:service-910577145779@serverless-robot-prod.iam.gserviceaccount.com"]},{"role":"roles/storage.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/run.invoker","members":["serviceAccount:910577145779-compute@developer.gserviceaccount.com"]},{"role":"roles/eventarc.eventReceiver","members":["serviceAccount:910577145779-compute@developer.gserviceaccount.com"]}]},"updateMask":"bindings"}
+[debug] [2025-11-07T02:23:12.211Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/910577145779:setIamPolicy 200
+[debug] [2025-11-07T02:23:12.211Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/910577145779:setIamPolicy {"version":1,"etag":"BwZC990AZlY=","bindings":[{"role":"roles/artifactregistry.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-artifactregistry.iam.gserviceaccount.com"]},{"role":"roles/cloudbuild.builds.builder","members":["serviceAccount:910577145779@cloudbuild.gserviceaccount.com"]},{"role":"roles/cloudbuild.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-cloudbuild.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.serviceAgent","members":["serviceAccount:service-910577145779@gcf-admin-robot.iam.gserviceaccount.com"]},{"role":"roles/containerregistry.ServiceAgent","members":["serviceAccount:service-910577145779@containerregistry.iam.gserviceaccount.com"]},{"role":"roles/editor","members":["serviceAccount:910577145779-compute@developer.gserviceaccount.com","serviceAccount:910577145779@cloudservices.gserviceaccount.com","serviceAccount:deficiencias-viales-jhonn@appspot.gserviceaccount.com"]},{"role":"roles/eventarc.eventReceiver","members":["serviceAccount:910577145779-compute@developer.gserviceaccount.com"]},{"role":"roles/firebase.managementServiceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebase.iam.gserviceaccount.com"]},{"role":"roles/firebase.sdkAdminServiceAgent","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/firebaseauth.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]},{"role":"roles/firebasemods.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebasemods.iam.gserviceaccount.com"]},{"role":"roles/firebaserules.system","members":["serviceAccount:service-910577145779@firebase-rules.iam.gserviceaccount.com"]},{"role":"roles/firebasestorage.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firebasestorage.iam.gserviceaccount.com"]},{"role":"roles/firestore.serviceAgent","members":["serviceAccount:service-910577145779@gcp-sa-firestore.iam.gserviceaccount.com"]},{"role":"roles/iam.serviceAccountTokenCreator","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com","serviceAccount:service-910577145779@gcp-sa-pubsub.iam.gserviceaccount.com"]},{"role":"roles/owner","members":["user:StevenJhon222@gmail.com"]},{"role":"roles/run.invoker","members":["serviceAccount:910577145779-compute@developer.gserviceaccount.com"]},{"role":"roles/run.serviceAgent","members":["serviceAccount:service-910577145779@serverless-robot-prod.iam.gserviceaccount.com"]},{"role":"roles/storage.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@deficiencias-viales-jhonn.iam.gserviceaccount.com"]}]}
+[debug] [2025-11-07T02:23:12.212Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:12.212Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:12.212Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn [none]
+[debug] [2025-11-07T02:23:12.508Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn 200
+[debug] [2025-11-07T02:23:12.508Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/deficiencias-viales-jhonn {"projectNumber":"910577145779","projectId":"deficiencias-viales-jhonn","lifecycleState":"ACTIVE","name":"Deficiencias-Viales-Jhonn","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-10-24T01:03:35.669642Z"}
+[debug] [2025-11-07T02:23:12.508Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:12.508Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:12.508Z] >>> [apiv2][query] GET https://compute.googleapis.com/compute/v1/projects/910577145779 [none]
+[debug] [2025-11-07T02:23:12.775Z] <<< [apiv2][status] GET https://compute.googleapis.com/compute/v1/projects/910577145779 403
+[debug] [2025-11-07T02:23:12.775Z] <<< [apiv2][body] GET https://compute.googleapis.com/compute/v1/projects/910577145779 {"error":{"code":403,"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779","consumer":"projects/910577145779","service":"compute.googleapis.com","serviceTitle":"Compute Engine API","containerInfo":"910577145779"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779"}]}]}}
+[debug] [2025-11-07T02:23:12.775Z] unable to look up default compute service account. Falling back to 910577145779-compute@developer.gserviceaccount.com. Error: {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":403,"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779","consumer":"projects/910577145779","service":"compute.googleapis.com","serviceTitle":"Compute Engine API","containerInfo":"910577145779"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779"}]}]}},"response":{"statusCode":403}},"exit":1,"message":"Request to https://compute.googleapis.com/compute/v1/projects/910577145779 had HTTP Error: 403, Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","status":403}
+[debug] [2025-11-07T02:23:12.776Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:12.776Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:12.776Z] >>> [apiv2][query] GET https://compute.googleapis.com/compute/v1/projects/910577145779 [none]
+[debug] [2025-11-07T02:23:13.035Z] <<< [apiv2][status] GET https://compute.googleapis.com/compute/v1/projects/910577145779 403
+[debug] [2025-11-07T02:23:13.035Z] <<< [apiv2][body] GET https://compute.googleapis.com/compute/v1/projects/910577145779 {"error":{"code":403,"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"consumer":"projects/910577145779","service":"compute.googleapis.com","containerInfo":"910577145779","activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779","serviceTitle":"Compute Engine API"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779"}]}]}}
+[debug] [2025-11-07T02:23:13.036Z] unable to look up default compute service account. Falling back to 910577145779-compute@developer.gserviceaccount.com. Error: {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":403,"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","errors":[{"message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","domain":"usageLimits","reason":"accessNotConfigured","extendedHelp":"https://console.developers.google.com"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"SERVICE_DISABLED","domain":"googleapis.com","metadata":{"consumer":"projects/910577145779","service":"compute.googleapis.com","containerInfo":"910577145779","activationUrl":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779","serviceTitle":"Compute Engine API"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developers console API activation","url":"https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779"}]}]}},"response":{"statusCode":403}},"exit":1,"message":"Request to https://compute.googleapis.com/compute/v1/projects/910577145779 had HTTP Error: 403, Compute Engine API has not been used in project 910577145779 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=910577145779 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","status":403}
+[debug] [2025-11-07T02:23:13.037Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:13.037Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:13.037Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/deficiencias-viales-jhonn/billingInfo [none]
+[debug] [2025-11-07T02:23:14.172Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/deficiencias-viales-jhonn/billingInfo 200
+[debug] [2025-11-07T02:23:14.172Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/deficiencias-viales-jhonn/billingInfo {"name":"projects/deficiencias-viales-jhonn/billingInfo","projectId":"deficiencias-viales-jhonn","billingAccountName":"billingAccounts/010D2A-B6EB79-D1B4CD","billingEnabled":true}
+[debug] [2025-11-07T02:23:14.174Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:14.174Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:23:14.175Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions:generateUploadUrl [none]
+[debug] [2025-11-07T02:23:14.924Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions:generateUploadUrl 200
+[debug] [2025-11-07T02:23:14.924Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions:generateUploadUrl {"uploadUrl":"https://storage.googleapis.com/gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com/a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip?GoogleAccessId=service-910577145779@gcf-admin-robot.iam.gserviceaccount.com&Expires=1762483995&Signature=SA1Fy1tq%2FRGJzgBHkFcfdy6vSdI0v3Kv0P2zvjjKRA3AG3ZeMgCPvVhSlFJC6QPeXo751G4%2BbZ23iFItvUqLoPVs0z6fWSB79SCxtdc6%2BrEYAG4FSNnqVUsE%2FmmjEwZBESYk098h%2BYo0JQG0rKFIC77Vw6qTx8gSSshsINSsyaEA%2BjZSze7615d0BYaZC2t%2BzvmTNmdL8NBdITlrucG6vcOWe7wOtbPDv7BQHkJevuiGZWQQvu1ebj8pOLljVhBx38gP469%2FngU267zbRPl1SYS3d0CyA0%2FpbGsL9ufXqCw1flwKNJMEAowP1pBliafP4Bqw9pXI5vfpyrBfdQ6xoA%3D%3D","storageSource":{"bucket":"gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com","object":"a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip"}}
+[debug] [2025-11-07T02:23:14.926Z] >>> [apiv2][query] PUT https://storage.googleapis.com/gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com/a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip GoogleAccessId=service-910577145779%40gcf-admin-robot.iam.gserviceaccount.com&Expires=1762483995&Signature=SA1Fy1tq%2FRGJzgBHkFcfdy6vSdI0v3Kv0P2zvjjKRA3AG3ZeMgCPvVhSlFJC6QPeXo751G4%2BbZ23iFItvUqLoPVs0z6fWSB79SCxtdc6%2BrEYAG4FSNnqVUsE%2FmmjEwZBESYk098h%2BYo0JQG0rKFIC77Vw6qTx8gSSshsINSsyaEA%2BjZSze7615d0BYaZC2t%2BzvmTNmdL8NBdITlrucG6vcOWe7wOtbPDv7BQHkJevuiGZWQQvu1ebj8pOLljVhBx38gP469%2FngU267zbRPl1SYS3d0CyA0%2FpbGsL9ufXqCw1flwKNJMEAowP1pBliafP4Bqw9pXI5vfpyrBfdQ6xoA%3D%3D
+[debug] [2025-11-07T02:23:14.927Z] >>> [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com/a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip [stream]
+[debug] [2025-11-07T02:23:15.528Z] <<< [apiv2][status] PUT https://storage.googleapis.com/gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com/a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip 200
+[debug] [2025-11-07T02:23:15.529Z] <<< [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com/a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip [omitted]
+[info] +  functions: functions source uploaded successfully 
+[info] 
+The following functions are found in your project but do not exist in your local source code:
+	helloWorld(southamerica-east1)
+
+If you are renaming a function or changing its region, it is recommended that you create the new function first before deleting the old one to prevent event loss. For more info, visit https://firebase.google.com/docs/functions/manage-functions#modify
+
+[info] i  functions: creating Node.js 20 (2nd Gen) function notificarAutoridadNuevoReporte(southamerica-east1)... 
+[info] i  functions: creating Node.js 20 (2nd Gen) function notificarUsuarioCambioEstado(southamerica-east1)... 
+[debug] [2025-11-07T02:24:32.460Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:32.460Z] Checked if tokens are valid: true, expires at: 1762483400431
+[info] i  functions: deleting Node.js 20 (2nd Gen) function helloWorld(southamerica-east1)... 
+[debug] [2025-11-07T02:24:32.462Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:32.462Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:32.463Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions functionId=notificarAutoridadNuevoReporte
+[debug] [2025-11-07T02:24:32.463Z] >>> [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarAutoridadNuevoReporte","buildConfig":{"runtime":"nodejs20","entryPoint":"notificarAutoridadNuevoReporte","source":{"storageSource":{"bucket":"gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com","object":"a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""}},"serviceConfig":{"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"deficiencias-viales-jhonn\",\"storageBucket\":\"deficiencias-viales-jhonn.firebasestorage.app\"}","GCLOUD_PROJECT":"deficiencias-viales-jhonn","EVENTARC_CLOUD_EVENT_SOURCE":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/notificarAutoridadNuevoReporte","FUNCTION_SIGNATURE_TYPE":"cloudevent","FUNCTION_TARGET":"notificarAutoridadNuevoReporte","LOG_EXECUTION_ID":"true"},"ingressSettings":null,"timeoutSeconds":null,"serviceAccountEmail":null,"availableMemory":"256Mi","minInstanceCount":null,"maxInstanceCount":null,"maxInstanceRequestConcurrency":80,"availableCpu":"1","vpcConnector":null,"vpcConnectorEgressSettings":null},"labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"56ce8f043fdeaad2f7ee7885105bc4f842c05372"},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","retryPolicy":"RETRY_POLICY_DO_NOT_RETRY","eventFilters":[{"attribute":"database","value":"(default)"},{"attribute":"namespace","value":"(default)"},{"attribute":"document","value":"reportes/{reporteId}","operator":"match-path-pattern"}],"triggerRegion":"southamerica-west1"}}
+[debug] [2025-11-07T02:24:32.466Z] >>> [apiv2][query] DELETE https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld [none]
+[debug] [2025-11-07T02:24:33.458Z] <<< [apiv2][status] DELETE https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld 200
+[debug] [2025-11-07T02:24:33.458Z] <<< [apiv2][body] DELETE https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658","metadata":{"@type":"type.googleapis.com/google.cloud.functions.v2.OperationMetadata","createTime":"2025-11-07T02:24:33.757945883Z","target":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","verb":"delete","cancelRequested":false,"apiVersion":"v2"},"done":false}
+[debug] [2025-11-07T02:24:33.459Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:33.459Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:33.459Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 [none]
+[debug] [2025-11-07T02:24:33.924Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 200
+[debug] [2025-11-07T02:24:33.924Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658","metadata":{"@type":"type.googleapis.com/google.cloud.functions.v2.OperationMetadata","createTime":"2025-11-07T02:24:33.757945883Z","target":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","verb":"delete","cancelRequested":false,"apiVersion":"v2","requestResource":{"@type":"type.googleapis.com/google.cloud.functions.v2.Function","name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","environment":"GEN_2"},"stages":[{"name":"ARTIFACT_REGISTRY","state":"NOT_STARTED"},{"name":"SERVICE","message":"Deleting Cloud Run service","state":"IN_PROGRESS","resource":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/helloworld"}],"operationType":"DELETE_FUNCTION"},"done":false}
+[debug] [2025-11-07T02:24:34.427Z] [delete-default-southamerica-east1-helloWorld] Retrying task index 0
+[debug] [2025-11-07T02:24:34.427Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:34.427Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:34.427Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 [none]
+[debug] [2025-11-07T02:24:34.870Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 200
+[debug] [2025-11-07T02:24:34.871Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658","metadata":{"@type":"type.googleapis.com/google.cloud.functions.v2.OperationMetadata","createTime":"2025-11-07T02:24:33.757945883Z","target":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","verb":"delete","cancelRequested":false,"apiVersion":"v2","requestResource":{"@type":"type.googleapis.com/google.cloud.functions.v2.Function","name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","environment":"GEN_2"},"stages":[{"name":"ARTIFACT_REGISTRY","state":"NOT_STARTED"},{"name":"SERVICE","message":"Deleting Cloud Run service","state":"IN_PROGRESS","resource":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/helloworld"}],"operationType":"DELETE_FUNCTION"},"done":false}
+[debug] [2025-11-07T02:24:35.877Z] [delete-default-southamerica-east1-helloWorld] Retrying task index 0
+[debug] [2025-11-07T02:24:35.878Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:35.878Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:35.878Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 [none]
+[debug] [2025-11-07T02:24:36.239Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 200
+[debug] [2025-11-07T02:24:36.239Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658","metadata":{"@type":"type.googleapis.com/google.cloud.functions.v2.OperationMetadata","createTime":"2025-11-07T02:24:33.757945883Z","target":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","verb":"delete","cancelRequested":false,"apiVersion":"v2","requestResource":{"@type":"type.googleapis.com/google.cloud.functions.v2.Function","name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","environment":"GEN_2"},"stages":[{"name":"ARTIFACT_REGISTRY","message":"Deleting function artifacts in Artifact Registry","state":"IN_PROGRESS"},{"name":"SERVICE","message":"Deleting Cloud Run service","state":"COMPLETE","resource":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/helloworld"}],"operationType":"DELETE_FUNCTION"},"done":false}
+[debug] [2025-11-07T02:24:38.245Z] [delete-default-southamerica-east1-helloWorld] Retrying task index 0
+[debug] [2025-11-07T02:24:38.246Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:38.246Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:38.246Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 [none]
+[debug] [2025-11-07T02:24:38.676Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 200
+[debug] [2025-11-07T02:24:38.676Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658 {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/operations/operation-1762482273727-642f7e1d9343f-ab4b3da0-04a7a658","metadata":{"@type":"type.googleapis.com/google.cloud.functions.v2.OperationMetadata","createTime":"2025-11-07T02:24:33.757945883Z","endTime":"2025-11-07T02:24:36.793356696Z","target":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","verb":"delete","cancelRequested":false,"apiVersion":"v2","requestResource":{"@type":"type.googleapis.com/google.cloud.functions.v2.Function","name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/helloWorld","environment":"GEN_2"},"stages":[{"name":"ARTIFACT_REGISTRY","message":"Deleting function artifacts in Artifact Registry","state":"COMPLETE"},{"name":"SERVICE","message":"Deleting Cloud Run service","state":"COMPLETE","resource":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/helloworld"}],"operationType":"DELETE_FUNCTION"},"done":true,"response":{"@type":"type.googleapis.com/google.protobuf.Empty"}}
+[info] +  functions[helloWorld(southamerica-east1)] Successful delete operation. 
+[debug] [2025-11-07T02:24:49.492Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions 400
+[debug] [2025-11-07T02:24:49.492Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions {"error":{"code":400,"message":"Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarautoridadnuevoreporte-902307: Invalid resource state for \"\": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.","status":"FAILED_PRECONDITION"}}
+[warn] !  functions: Request to https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions?functionId=notificarAutoridadNuevoReporte had HTTP Error: 400, Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarautoridadnuevoreporte-902307: Invalid resource state for "": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role. 
+[warn] !  functions: Since this is your first time using 2nd gen functions, we need a little bit longer to finish setting everything up. Retry the deployment in a few minutes. 
+[warn] !  functions:  failed to create function projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarAutoridadNuevoReporte 
+[error] Failed to create function projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarAutoridadNuevoReporte
+[debug] [2025-11-07T02:24:49.495Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:49.495Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:24:49.495Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions functionId=notificarUsuarioCambioEstado
+[debug] [2025-11-07T02:24:49.495Z] >>> [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarUsuarioCambioEstado","buildConfig":{"runtime":"nodejs20","entryPoint":"notificarUsuarioCambioEstado","source":{"storageSource":{"bucket":"gcf-v2-uploads-910577145779.southamerica-east1.cloudfunctions.appspot.com","object":"a0176aa6-55bd-40e1-9b2d-f6acd263ca84.zip"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""}},"serviceConfig":{"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"deficiencias-viales-jhonn\",\"storageBucket\":\"deficiencias-viales-jhonn.firebasestorage.app\"}","GCLOUD_PROJECT":"deficiencias-viales-jhonn","EVENTARC_CLOUD_EVENT_SOURCE":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/notificarUsuarioCambioEstado","FUNCTION_SIGNATURE_TYPE":"cloudevent","FUNCTION_TARGET":"notificarUsuarioCambioEstado","LOG_EXECUTION_ID":"true"},"ingressSettings":null,"timeoutSeconds":null,"serviceAccountEmail":null,"availableMemory":"256Mi","minInstanceCount":null,"maxInstanceCount":null,"maxInstanceRequestConcurrency":80,"availableCpu":"1","vpcConnector":null,"vpcConnectorEgressSettings":null},"labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"56ce8f043fdeaad2f7ee7885105bc4f842c05372"},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.updated","retryPolicy":"RETRY_POLICY_DO_NOT_RETRY","eventFilters":[{"attribute":"database","value":"(default)"},{"attribute":"namespace","value":"(default)"},{"attribute":"document","value":"reportes/{reporteId}","operator":"match-path-pattern"}],"triggerRegion":"southamerica-west1"}}
+[debug] [2025-11-07T02:25:05.333Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions 400
+[debug] [2025-11-07T02:25:05.333Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions {"error":{"code":400,"message":"Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarusuariocambioestado-619119: Invalid resource state for \"\": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.","status":"FAILED_PRECONDITION"}}
+[warn] !  functions: Request to https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions?functionId=notificarUsuarioCambioEstado had HTTP Error: 400, Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarusuariocambioestado-619119: Invalid resource state for "": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role. 
+[warn] !  functions: Since this is your first time using 2nd gen functions, we need a little bit longer to finish setting everything up. Retry the deployment in a few minutes. 
+[warn] !  functions:  failed to create function projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarUsuarioCambioEstado 
+[error] Failed to create function projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarUsuarioCambioEstado
+[debug] [2025-11-07T02:25:05.346Z] Total Function Deployment time: 32880
+[debug] [2025-11-07T02:25:05.346Z] 3 Functions Deployed
+[debug] [2025-11-07T02:25:05.346Z] 2 Functions Errored
+[debug] [2025-11-07T02:25:05.346Z] 0 Function Deployments Aborted
+[debug] [2025-11-07T02:25:05.346Z] Average Function Deployment time: 18710.333333333332
+[info] 
+[info] Functions deploy had errors with the following functions:
+	notificarAutoridadNuevoReporte(southamerica-east1)
+	notificarUsuarioCambioEstado(southamerica-east1)
+[debug] [2025-11-07T02:25:05.650Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:25:05.650Z] Checked if tokens are valid: true, expires at: 1762483400431
+[debug] [2025-11-07T02:25:05.650Z] >>> [apiv2][query] GET https://artifactregistry.googleapis.com/v1/projects/deficiencias-viales-jhonn/locations/southamerica-east1/repositories/gcf-artifacts [none]
+[debug] [2025-11-07T02:25:06.295Z] <<< [apiv2][status] GET https://artifactregistry.googleapis.com/v1/projects/deficiencias-viales-jhonn/locations/southamerica-east1/repositories/gcf-artifacts 200
+[debug] [2025-11-07T02:25:06.295Z] <<< [apiv2][body] GET https://artifactregistry.googleapis.com/v1/projects/deficiencias-viales-jhonn/locations/southamerica-east1/repositories/gcf-artifacts {"name":"projects/deficiencias-viales-jhonn/locations/southamerica-east1/repositories/gcf-artifacts","format":"DOCKER","description":"This repository is created and used by Cloud Functions for storing function docker images.","labels":{"goog-managed-by":"cloudfunctions"},"createTime":"2025-11-07T02:17:40.397717Z","updateTime":"2025-11-07T02:24:36.512504Z","mode":"STANDARD_REPOSITORY","cleanupPolicies":{"firebase-functions-cleanup":{"id":"firebase-functions-cleanup","action":"DELETE","condition":{"tagState":"ANY","olderThan":"86400s"}}},"sizeBytes":"86528418","satisfiesPzs":true,"vulnerabilityScanningConfig":{"lastEnableTime":"2025-11-07T02:17:23.960522404Z","enablementState":"SCANNING_DISABLED","enablementStateReason":"API containerscanning.googleapis.com is not enabled."},"satisfiesPzi":true,"registryUri":"southamerica-east1-docker.pkg.dev/deficiencias-viales-jhonn/gcf-artifacts"}
+[debug] [2025-11-07T02:25:06.295Z] Functions deploy failed.
+[debug] [2025-11-07T02:25:06.295Z] {
+  "endpoint": {
+    "id": "notificarAutoridadNuevoReporte",
+    "project": "deficiencias-viales-jhonn",
+    "region": "southamerica-east1",
+    "entryPoint": "notificarAutoridadNuevoReporte",
+    "platform": "gcfv2",
+    "runtime": "nodejs20",
+    "eventTrigger": {
+      "eventType": "google.cloud.firestore.document.v1.created",
+      "retry": false,
+      "eventFilters": {
+        "database": "(default)",
+        "namespace": "(default)"
+      },
+      "eventFilterPathPatterns": {
+        "document": "reportes/{reporteId}"
+      },
+      "region": "southamerica-west1"
+    },
+    "labels": {
+      "deployment-tool": "cli-firebase"
+    },
+    "serviceAccount": null,
+    "ingressSettings": null,
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "maxInstances": null,
+    "minInstances": null,
+    "concurrency": 80,
+    "vpc": null,
+    "environmentVariables": {
+      "FIREBASE_CONFIG": "{\"projectId\":\"deficiencias-viales-jhonn\",\"storageBucket\":\"deficiencias-viales-jhonn.firebasestorage.app\"}",
+      "GCLOUD_PROJECT": "deficiencias-viales-jhonn",
+      "EVENTARC_CLOUD_EVENT_SOURCE": "projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/notificarAutoridadNuevoReporte"
+    },
+    "codebase": "default",
+    "cpu": 1,
+    "targetedByOnly": false,
+    "hash": "56ce8f043fdeaad2f7ee7885105bc4f842c05372"
+  },
+  "op": "create",
+  "original": {
+    "name": "FirebaseError",
+    "children": [],
+    "context": {
+      "function": "projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarAutoridadNuevoReporte"
+    },
+    "exit": 1,
+    "message": "Failed to create function projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarAutoridadNuevoReporte",
+    "original": {
+      "name": "FirebaseError",
+      "children": [],
+      "context": {
+        "body": {
+          "error": {
+            "code": 400,
+            "message": "Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarautoridadnuevoreporte-902307: Invalid resource state for \"\": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.",
+            "status": "FAILED_PRECONDITION"
+          }
+        },
+        "response": {
+          "statusCode": 400
+        }
+      },
+      "exit": 1,
+      "message": "Request to https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions?functionId=notificarAutoridadNuevoReporte had HTTP Error: 400, Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarautoridadnuevoreporte-902307: Invalid resource state for \"\": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.",
+      "status": 400
+    },
+    "status": 400,
+    "code": 400
+  }
+}
+[debug] [2025-11-07T02:25:06.296Z] {
+  "endpoint": {
+    "id": "notificarUsuarioCambioEstado",
+    "project": "deficiencias-viales-jhonn",
+    "region": "southamerica-east1",
+    "entryPoint": "notificarUsuarioCambioEstado",
+    "platform": "gcfv2",
+    "runtime": "nodejs20",
+    "eventTrigger": {
+      "eventType": "google.cloud.firestore.document.v1.updated",
+      "retry": false,
+      "eventFilters": {
+        "database": "(default)",
+        "namespace": "(default)"
+      },
+      "eventFilterPathPatterns": {
+        "document": "reportes/{reporteId}"
+      },
+      "region": "southamerica-west1"
+    },
+    "labels": {
+      "deployment-tool": "cli-firebase"
+    },
+    "serviceAccount": null,
+    "ingressSettings": null,
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "maxInstances": null,
+    "minInstances": null,
+    "concurrency": 80,
+    "vpc": null,
+    "environmentVariables": {
+      "FIREBASE_CONFIG": "{\"projectId\":\"deficiencias-viales-jhonn\",\"storageBucket\":\"deficiencias-viales-jhonn.firebasestorage.app\"}",
+      "GCLOUD_PROJECT": "deficiencias-viales-jhonn",
+      "EVENTARC_CLOUD_EVENT_SOURCE": "projects/deficiencias-viales-jhonn/locations/southamerica-east1/services/notificarUsuarioCambioEstado"
+    },
+    "codebase": "default",
+    "cpu": 1,
+    "targetedByOnly": false,
+    "hash": "56ce8f043fdeaad2f7ee7885105bc4f842c05372"
+  },
+  "op": "create",
+  "original": {
+    "name": "FirebaseError",
+    "children": [],
+    "context": {
+      "function": "projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarUsuarioCambioEstado"
+    },
+    "exit": 1,
+    "message": "Failed to create function projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions/notificarUsuarioCambioEstado",
+    "original": {
+      "name": "FirebaseError",
+      "children": [],
+      "context": {
+        "body": {
+          "error": {
+            "code": 400,
+            "message": "Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarusuariocambioestado-619119: Invalid resource state for \"\": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.",
+            "status": "FAILED_PRECONDITION"
+          }
+        },
+        "response": {
+          "statusCode": 400
+        }
+      },
+      "exit": 1,
+      "message": "Request to https://cloudfunctions.googleapis.com/v2/projects/deficiencias-viales-jhonn/locations/southamerica-east1/functions?functionId=notificarUsuarioCambioEstado had HTTP Error: 400, Validation failed for trigger projects/deficiencias-viales-jhonn/locations/southamerica-west1/triggers/notificarusuariocambioestado-619119: Invalid resource state for \"\": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.",
+      "status": 400
+    },
+    "status": 400,
+    "code": 400
+  }
+}
+[error] Error: There was an error deploying functions:
+[error] - Error Failed to create function notificarAutoridadNuevoReporte in region southamerica-east1
+[error] - Error Failed to create function notificarUsuarioCambioEstado in region southamerica-east1
