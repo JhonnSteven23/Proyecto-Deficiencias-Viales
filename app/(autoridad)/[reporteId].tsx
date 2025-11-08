@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Button, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -63,6 +63,29 @@ export default function AutoridadReporteDetalle() {
     const exito = await actualizarEstadoReporte(reporte.id, nuevoStatus);
     setIsLoading(false);
 
+    let updateData: any = {
+      status: nuevoStatus,
+    };
+
+    if (nuevoStatus === 'En progreso') {
+      updateData.acceptedAt = serverTimestamp();
+    } else if (nuevoStatus === 'Completado') {
+      updateData.completedAt = serverTimestamp();
+    }
+    const reporteDocRef = doc(FIREBASE_DB, "reportes", reporte.id);
+    try {
+      await updateDoc(reporteDocRef, updateData);
+      
+      setIsLoading(false);
+      Alert.alert("Éxito", `El reporte ha sido marcado como "${nuevoStatus}".`);
+      router.back(); 
+
+    } catch (error) {
+      setIsLoading(false);
+      console.error("Error al actualizar estado: ", error);
+      Alert.alert("Error", "Hubo un problema al actualizar el reporte.");
+    }
+
     if (exito) {
       Alert.alert("Éxito", `El reporte ha sido marcado como "${nuevoStatus}".`);
       router.back();
@@ -103,17 +126,17 @@ export default function AutoridadReporteDetalle() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Ubicación</Text>
           <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: reporte.ubicacion.latitude,
-              longitude: reporte.ubicacion.longitude,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005,
-            }}
-            scrollEnabled={false} 
-          >
-            <Marker coordinate={reporte.ubicacion} />
-          </MapView>
+                style={styles.map}
+                region={{ 
+                    latitude: reporte.ubicacion.latitude,
+                    longitude: reporte.ubicacion.longitude,
+                    latitudeDelta: 0.005,
+                    longitudeDelta: 0.005,
+                }}
+                scrollEnabled={false} 
+                >
+                <Marker coordinate={reporte.ubicacion} />
+                </MapView>
         </View>
 
         <View style={styles.card}>
