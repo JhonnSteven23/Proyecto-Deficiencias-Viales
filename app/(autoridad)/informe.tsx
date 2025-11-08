@@ -6,6 +6,19 @@ import * as Sharing from 'expo-sharing';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+interface Reporte {
+  id: string;
+  tipo: string;
+  descripcion: string;
+  imagenUrl: string;
+  status: string;
+  createdAt: any;
+  ubicacion: {
+    latitude: number;
+    longitude: number;
+  };
+}
 interface Stats {
   total: number;
   espera: number;
@@ -37,77 +50,84 @@ const StatCard = ({ title, value, iconName }: { title: string, value: string | n
   </View>
 );
 
-const generateHTML = (profile: any, stats: Stats): string => {
-  const fecha = new Date().toLocaleDateString();
-  const especialidad = profile.especialidad.charAt(0).toUpperCase() + profile.especialidad.slice(1);
+const generateHTML = (profile: any, stats: Stats, reportes: Reporte[]): string => {
+  const fecha = new Date().toLocaleDateString();
+  const especialidad = profile.especialidad.charAt(0).toUpperCase() + profile.especialidad.slice(1);
 
-  const styles = `
-    <style>
-      body { font-family: sans-serif; margin: 20px; }
-      h1 { color: #007AFF; }
-      h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-      th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-      th { background-color: #f5f5f5; }
-      .header { text-align: center; }
-      .label { font-weight: bold; }
-    </style>
-  `;
-  return `
-    <html>
-      <head>${styles}</head>
-      <body>
-        <div class="header">
-          <h1>Informe de Gestión de Deficiencias</h1>
-          <p>Generado el: ${fecha}</p>
-        </div>
-        
-        <h2>Gestor: ${profile.displayName}</h2>
-        <p><span class="label">Especialidad:</span> ${especialidad}s</p>
-        
-        <h2>Resumen de Productividad</h2>
-        <table>
-          <tr>
-            <td>Total Asignados</td>
-            <td>${stats.total}</td>
-          </tr>
-          <tr>
-            <td>Completados</td>
-            <td>${stats.completados}</td>
-          </tr>
+  const styles = `
+    <style>
+      body { font-family: sans-serif; margin: 20px; }
+      h1 { color: #007AFF; }
+      h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background-color: #f5f5f5; }
+      .header { text-align: center; }
+      .label { font-weight: bold; }
+      .text-wrap { word-wrap: break-word; }
+    </style>
+  `;
+
+  let reportesHtml = '<h2>Detalle de Reportes</h2><table>';
+  reportesHtml += `
+    <tr>
+      <th>ID</th>
+      <th>Tipo</th>
+      <th>Fecha</th>
+      <th>Estado</th>
+      <th>Descripción</th>
+      <th>Enlace Imagen</th>
+    </tr>
+  `;
+
+  for (const reporte of reportes) {
+    reportesHtml += `
+      <tr>
+        <td>${reporte.id.substring(0, 5)}...</td>
+        <td>${reporte.tipo}</td>
+        <td>${reporte.createdAt?.toDate().toLocaleDateString() || 'N/A'}</td>
+        <td>${reporte.status}</td>
+        <td class="text-wrap">${reporte.descripcion.substring(0, 50)}...</td>
+        <td><a href="${reporte.imagenUrl}">Ver Evidencia</a></td>
+      </tr>
+    `;
+  }
+  reportesHtml += '</table>';
+  
+  return `
+    <html>
+      <head>${styles}</head>
+      <body>
+        <div class="header">
+          <h1>Informe de Gestión de Deficiencias</h1>
+          <p>Generado el: ${fecha}</p>
+        </div>
+        
+        <h2>Gestor: ${profile.displayName}</h2>
+        <p><span class="label">Especialidad:</span> ${especialidad}s</p>
+        
+                <h2>Resumen de Productividad</h2>
+        <table>
+          <tr><td>Total Asignados</td><td>${stats.total}</td></tr>
+          <tr><td>Completados</td><td>${stats.completados}</td></tr>
         </table>
-        
-        <h2>Carga de Trabajo Actual</h2>
-        <table>
-          <tr>
-            <td>En Espera</td>
-            <td>${stats.espera}</td>
-          </tr>
-          <tr>
-            <td>En Progreso</td>
-            <td>${stats.progreso}</td>
-          </tr>
-          <tr>
-            <td>Rechazados</td>
-            <td>${stats.rechazados}</td>
-          </tr>
+        <h2>Carga de Trabajo Actual</h2>
+        <table>
+          <tr><td>En Espera</td><td>${stats.espera}</td></tr>
+          <tr><td>En Progreso</td><td>${stats.progreso}</td></tr>
+          <tr><td>Rechazados</td><td>${stats.rechazados}</td></tr>
         </table>
-        
-        <h2>Optimización de Procesos</h2>
-        <table>
-          <tr>
-            <td>Tiempo Promedio de Aceptación</td>
-            <td>${formatDuration(stats.avgAceptacionMs)}</td>
-          </tr>
-          <tr>
-            <td>Tiempo Promedio de Solución</td>
-            <td>${formatDuration(stats.avgSolucionMs)}</td>
-          </tr>
+        <h2>Optimización de Procesos</h2>
+        <table>
+          <tr><td>Tiempo Prom. Aceptación</td><td>${formatDuration(stats.avgAceptacionMs)}</td></tr>
+          <tr><td>Tiempo Prom. Solución</td><td>${formatDuration(stats.avgSolucionMs)}</td></tr>
         </table>
-        
-      </body>
-    </html>
-  `;
+
+                ${reportesHtml}
+        
+      </body>
+    </html>
+  `;
 };
 
 export default function InformeScreen() {
@@ -115,20 +135,22 @@ export default function InformeScreen() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [reportes, setReportes] = useState<Reporte[]>([]);
 
-  useEffect(() => {
-    if (!profile || !profile.especialidad) {
-      setIsLoading(false);
-      return; 
-    }
+    useEffect(() => {
+    if (!profile || !profile.especialidad) {
+      setIsLoading(false);
+      return; 
+    }
 
-    const reportesRef = collection(FIREBASE_DB, "reportes");
-    const q = query(
-      reportesRef,
-      where("tipo", "==", profile.especialidad)
-    );
+    const reportesRef = collection(FIREBASE_DB, "reportes");
+    const q = query(
+      reportesRef,
+      where("tipo", "==", profile.especialidad)
+    );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedReportes: Reporte[] = [];
       let espera = 0;
       let progreso = 0;
       let completados = 0;
@@ -141,6 +163,7 @@ export default function InformeScreen() {
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        fetchedReportes.push({ id: doc.id, ...data } as Reporte);
         const status = data.status;
 
         if (data.createdAt && data.acceptedAt) {
@@ -171,6 +194,7 @@ export default function InformeScreen() {
 
       const avgAceptacionMs = reportesConAceptacion > 0 ? totalTiemposAceptacion / reportesConAceptacion : 0;
       const avgSolucionMs = reportesConSolucion > 0 ? totalTiemposSolucion / reportesConSolucion : 0;
+      setReportes(fetchedReportes);
 
       setStats({
         total: querySnapshot.size,
@@ -193,18 +217,19 @@ export default function InformeScreen() {
 
 
   const handleGeneratePDF = async () => {
-    if (!stats || !profile) {
+    if (!stats || !profile || reportes.length === 0) {
       Alert.alert("Error", "No hay datos para generar el informe.");
       return;
     }
-    setIsGeneratingPDF(true); 
+    setIsGeneratingPDF(true);
     try {
-      const html = generateHTML(profile, stats);
+      const html = generateHTML(profile, stats, reportes);
+      
       const { uri } = await Print.printToFileAsync({ html });
       console.log('PDF generado en:', uri);
 
       if (!(await Sharing.isAvailableAsync())) {
-        Alert.alert("Error", "La función de compartir no está disponible en este dispositivo.");
+        Alert.alert("Error", "La función de compartir no está disponible.");
         return;
       }
       
@@ -218,7 +243,7 @@ export default function InformeScreen() {
       console.error("Error al generar PDF: ", error);
       Alert.alert("Error", "No se pudo generar el PDF.");
     } finally {
-      setIsGeneratingPDF(false); 
+      setIsGeneratingPDF(false);
     }
   };
 
