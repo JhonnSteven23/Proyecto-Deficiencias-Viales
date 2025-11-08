@@ -3,7 +3,7 @@ import { FIREBASE_DB } from '@/services/firebase';
 import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SceneMap, TabBar, TabView } from 'react-native-pager-view';
+import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 
 interface Reporte {
   id: string;

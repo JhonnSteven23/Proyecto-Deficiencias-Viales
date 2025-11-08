@@ -19,10 +19,10 @@ const createUserProfile = async (user: any): Promise<any> => {
       displayName: user.displayName,
       photoURL: user.photoURL,
       role: "usuario", 
-      "pushToken": "ExponentPushToken[...]",
-      "especialidad": null,
+      pushToken: null,     
+      especialidad: null,  
       createdAt: serverTimestamp() 
-    };
+  };
     
     try {
       await setDoc(userDocRef, profileData);

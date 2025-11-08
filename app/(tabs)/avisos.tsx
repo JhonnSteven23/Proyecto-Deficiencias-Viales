@@ -3,17 +3,15 @@ import { FIREBASE_DB } from '@/services/firebase';
 import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
-
-// Interfaz para el documento de notificación
 interface Notificacion {
   id: string;
   titulo: string;
   cuerpo: string;
   leido: boolean;
-  createdAt: any; // Timestamp
+  createdAt: any; 
 }
 
-export default function AvisosScreen() {
+export default function AvisosScreenUsuario() {
   const { profile } = useAuth();
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,15 +23,13 @@ export default function AvisosScreen() {
     }
 
     const notificacionesRef = collection(FIREBASE_DB, "notificaciones");
+    
     const q = query(
       notificacionesRef,
-      // Filtra solo las notificaciones PARA ESTA autoridad
       where("userId", "==", profile.uid), 
-      // Muestra las más nuevas primero
       orderBy("createdAt", "desc") 
     );
 
-    // Escucha en tiempo real
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const notis: Notificacion[] = [];
       querySnapshot.forEach((doc) => {
@@ -42,11 +38,11 @@ export default function AvisosScreen() {
       setNotificaciones(notis);
       setIsLoading(false);
     }, (error) => {
-      console.error("Error al obtener notificaciones: ", error);
+      console.error("Error al obtener notificaciones del usuario: ", error);
       setIsLoading(false);
     });
 
-    return () => unsubscribe(); // Limpia el listener
+    return () => unsubscribe(); 
   }, [profile]);
 
   if (isLoading) {
@@ -66,7 +62,6 @@ export default function AvisosScreen() {
       <Text style={styles.title}>{item.titulo}</Text>
       <Text style={styles.body}>{item.cuerpo}</Text>
       <Text style={styles.date}>
-        {/* Muestra la fecha (simple) */}
         {item.createdAt?.toDate().toLocaleDateString()}
       </Text>
       {!item.leido && <View style={styles.unreadDot} />}
