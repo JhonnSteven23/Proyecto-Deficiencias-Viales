@@ -1,24 +1,29 @@
-import { Expo } from "expo-server-sdk";
-import * as admin from "firebase-admin";
 import { logger } from "firebase-functions";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 
-let db: admin.firestore.Firestore;
-let expo: Expo;
-
+let db: any;
+let expo: any;
+let admin: any;
 function initializeApp() {
-  if (!admin.apps.length) {
+  if (!admin) {
+    logger.info("Realizando Lazy Import de 'firebase-admin'...");
+    admin = require("firebase-admin");
     admin.initializeApp();
     db = admin.firestore();
+  }
+  
+  if (!expo) {
+    logger.info("Realizando Lazy Import de 'expo-server-sdk'...");
+    const { Expo } = require("expo-server-sdk");
     expo = new Expo();
-    logger.info("Inicialización (Cold Start) de Admin y Expo completada.");
   }
 }
 
 setGlobalOptions({ region: "southamerica-east1" });
 
 export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{reporteId}", async (event) => {
+
     initializeApp();
 
     if (!event.data) {
@@ -32,14 +37,12 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
         logger.error("No hay datos en el reporte.");
         return;
     }
-
     const tipoReporte = reporteData.tipo;
     if (!tipoReporte) {
         logger.error("El reporte no tiene 'tipo'.");
         return;
     }
     logger.info(`Nuevo reporte creado: ${reporteId}. Tipo: ${tipoReporte}`);
-
     const autoridadesRef = db.collection("users");
     const q = autoridadesRef
         .where("role", "==", "autoridad")
@@ -52,7 +55,7 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
       return;
     }
     const tokens: string[] = [];
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach((doc: any) => { 
       const userData = doc.data();
       if (userData.pushToken) {
         tokens.push(userData.pushToken);
@@ -62,9 +65,11 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
       logger.warn("Las autoridades encontradas no tienen pushTokens.");
       return;
     }
+    const { Expo } = require("expo-server-sdk"); 
+
     const messages = [];
     for (const pushToken of tokens) {
-      if (!Expo.isExpoPushToken(pushToken)) {
+      if (!Expo.isExpoPushToken(pushToken)) { 
         logger.error(`Token inválido: ${pushToken}`);
         continue;
       }
@@ -119,6 +124,8 @@ export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporte
       return;
     }
     const pushToken = userDoc.data()?.pushToken;
+    const { Expo } = require("expo-server-sdk"); 
+
     if (!pushToken || !Expo.isExpoPushToken(pushToken)) {
       logger.warn(`Usuario ${userId} no tiene un pushToken válido.`);
       return;
