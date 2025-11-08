@@ -2,9 +2,10 @@ import { useAuth } from '@/context/AuthContext';
 import { FIREBASE_DB } from '@/services/firebase';
 import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, Image, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
-
+ 
+import { useRouter } from 'expo-router';
 interface Reporte {
   id: string;
   tipo: string;
@@ -31,6 +32,7 @@ const ReportListScene = ({ status }: { status: "En espera" | "En progreso" | "Co
   const { profile } = useAuth();
   const [reportes, setReportes] = useState<Reporte[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (!profile || profile.role !== 'autoridad' || !profile.especialidad) {
@@ -74,36 +76,16 @@ const ReportListScene = ({ status }: { status: "En espera" | "En progreso" | "Co
   }
 
   const renderItem = ({ item }: { item: Reporte }) => (
-    <View style={styles.card}>
-      <Text style={styles.title}>Tipo: {item.tipo}</Text>
-      <Text>De: {item.userDisplayName}</Text>
-      <Image source={{ uri: item.imagenUrl }} style={styles.image} />
-      <Text style={styles.description}>{item.descripcion}</Text>
-      
-      <View style={styles.buttonRow}>
-        {item.status === 'En espera' && (
-          <>
-            <Button 
-              title="Rechazar" 
-              onPress={() => actualizarEstadoReporte(item.id, 'Rechazado')} 
-              color="#dc3545"
-            />
-            <Button 
-              title="Aceptar" 
-              onPress={() => actualizarEstadoReporte(item.id, 'En progreso')} 
-              color="#28a745"
-            />
-          </>
-        )}
-        {item.status === 'En progreso' && (
-          <Button 
-            title="Marcar como Completado" 
-            onPress={() => actualizarEstadoReporte(item.id, 'Completado')}
-            color="#007bff"
-          />
-        )}
+        <TouchableOpacity 
+      onPress={() => router.push(`/(autoridad)/${item.id}`)}
+    >
+      <View style={styles.card}>
+        <Text style={styles.title}>Tipo: {item.tipo}</Text>
+        <Text>De: {item.userDisplayName}</Text>
+        <Image source={{ uri: item.imagenUrl }} style={styles.image} />
+        <Text style={styles.description} numberOfLines={2}>{item.descripcion}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

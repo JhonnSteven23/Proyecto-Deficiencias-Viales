@@ -6,44 +6,72 @@ export default function AutoridadTabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: 'green',
+        tabBarActiveTintColor: '#007AFF', 
+        headerShown: true, 
       }}>
+      
       <Tabs.Screen
-        name="index"
+        name="index" 
         options={{
-          title: 'Informes',
+          title: 'Reportes', 
+          headerTitle: 'Panel de Reportes',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart" size={size} color={color} />
+            <Ionicons name="list-outline" size={size} color={color} /> 
           ),
         }}
       />
+
       <Tabs.Screen
-        name="reportes" 
+        name="informe" 
         options={{
-          title: 'Reportes',
+          title: 'Informes', 
+          headerTitle: 'Informes y Estadísticas',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="document-text" size={size} color={color} />
+            <Ionicons name="bar-chart-outline" size={size} color={color} />
           ),
         }}
       />
+
       <Tabs.Screen
-        name="mapa" 
+        name="avisos" 
         options={{
-          title: 'Mapa',
+          title: 'Avisos', 
+          headerTitle: 'Historial de Avisos',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={size} color={color} />
+            <Ionicons name="notifications-outline" size={size} color={color} />
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="mapa"
+        options={{
+          title: 'Mapa', 
+          headerTitle: 'Mapa de Deficiencias',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="perfil" 
         options={{
-          title: 'Perfil',
+          title: 'Perfil', 
+          headerTitle: 'Mi Perfil',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />
+      <Tabs.Screen
+        name="[reporteId]" 
+        options={{
+          href: null, 
+          headerTitle: 'Detalle del Reporte',
+        }}
+      />
+
     </Tabs>
   );
 }
