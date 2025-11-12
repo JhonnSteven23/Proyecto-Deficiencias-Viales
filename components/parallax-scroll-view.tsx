@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -27,6 +28,7 @@ export default function ParallaxScrollView({
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
+
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -44,6 +46,16 @@ export default function ParallaxScrollView({
     };
   });
 
+  const normalizeChildren = (node: React.ReactNode) =>
+    React.Children.map(node, (child) => {
+      if (typeof child === 'string' || typeof child === 'number') {
+        return <Text key={String(child)}>{child}</Text>;
+      }
+      return child;
+    });
+
+  const safeChildren = normalizeChildren(children);
+
   return (
     <Animated.ScrollView
       ref={scrollRef}
@@ -57,7 +69,7 @@ export default function ParallaxScrollView({
         ]}>
         {headerImage}
       </Animated.View>
-      <ThemedView style={styles.content}>{children}</ThemedView>
+      <ThemedView style={styles.content}>{safeChildren}</ThemedView>
     </Animated.ScrollView>
   );
 }
