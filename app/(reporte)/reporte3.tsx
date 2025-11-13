@@ -1,9 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Button, Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import uuid from 'react-native-uuid';
 import { useAuth } from '../../context/AuthContext';
 import { useReport } from '../../context/ReportContext';
@@ -52,7 +53,7 @@ export default function DetalleScreen() {
     }
   };
 
-const uploadImageAsync = async (uri: string, path: string): Promise<string> => {
+  const uploadImageAsync = async (uri: string, path: string): Promise<string> => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
@@ -85,9 +86,7 @@ const uploadImageAsync = async (uri: string, path: string): Promise<string> => {
       const reportUUID = uuid.v4() as string;
       const fileExtension = reportData.imagenUri.split('.').pop();
       const storagePath = `reportes/${profile.uid}/${reportUUID}.${fileExtension}`;
-      console.log("Subiendo imagen a: ", storagePath);
       const imageUrl = await uploadImageAsync(reportData.imagenUri, storagePath);
-      console.log("Imagen subida. URL: ", imageUrl);
       const reporteDocument = {
         tipo: reportData.tipo,
         ubicacion: {
@@ -105,8 +104,6 @@ const uploadImageAsync = async (uri: string, path: string): Promise<string> => {
       };
 
       const docRef = await addDoc(collection(FIREBASE_DB, "reportes"), reporteDocument);
-      console.log("Reporte guardado en Firestore con ID: ", docRef.id);
-
       Alert.alert("Éxito", "Tu reporte ha sido enviado correctamente.");
       limpiarReporte();
       router.replace('/(tabs)'); 
@@ -122,92 +119,211 @@ const uploadImageAsync = async (uri: string, path: string): Promise<string> => {
   if (isUploading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <StatusBar barStyle="dark-content" backgroundColor="#f4f4f8" />
+        <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Enviando reporte...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Resumen del Reporte</Text>
-        <Text>Tipo: {reportData.tipo || 'No seleccionado'}</Text>
-        <Text>
-          Ubicacion: {reportData.ubicacion 
-            ? `${reportData.ubicacion.latitude.toFixed(5)}, ${reportData.ubicacion.longitude.toFixed(5)}`
-            : 'No seleccionada'}
-        </Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Descripción</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Ejemplo: La deficiencia esta a mitad de la avenida"
-          multiline
-          maxLength={500}
-          onChangeText={setDescripcionLocal} 
-          value={descripcionLocal}
-        />
-        <Text style={styles.charCount}>{descripcionLocal.length}/500 caracteres</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Evidencia Fotográfica</Text>
-        <View style={styles.buttonRow}>
-          <Button title="Tomar Foto" onPress={tomarFoto} />
-          <Button title="Seleccionar de galeria" onPress={seleccionarDeGaleria} />
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f4f4f8" />
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Resumen del Reporte</Text>
+          <Text style={styles.infoText}>
+            <Text style={styles.infoLabel}>Tipo: </Text>
+            {reportData.tipo || 'No seleccionado'}
+          </Text>
+          <Text style={styles.infoText}>
+            <Text style={styles.infoLabel}>Ubicacion: </Text>
+            {reportData.ubicacion 
+              ? `${reportData.ubicacion.latitude.toFixed(5)}, ${reportData.ubicacion.longitude.toFixed(5)}`
+              : 'No seleccionada'}
+          </Text>
         </View>
-        
-        {imagenLocal ? (
-          <Image source={{ uri: imagenLocal }} style={styles.imagePreview} />
-        ) : (
-          <View style={styles.imagePlaceholder}>
-            <Text>No hay imágenes agregadas</Text>
-          </View>
-        )}
-      </View>
 
-      <Button title="Entregar reporte" onPress={handleEnviarReporte} />
-    </ScrollView>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Descripción</Text>
+          <View style={styles.textInputContainer}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Ejemplo: La deficiencia esta a mitad de la avenida"
+              placeholderTextColor="#999"
+              multiline
+              maxLength={500}
+              onChangeText={setDescripcionLocal} 
+              value={descripcionLocal}
+            />
+            <Text style={styles.charCount}>{descripcionLocal.length}/500 caracteres</Text>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Evidencia Fotográfica</Text>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.actionButton} onPress={tomarFoto}>
+              <Ionicons name="camera-outline" size={20} color="#007AFF" />
+              <Text style={styles.actionButtonText}>Tomar Foto</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={seleccionarDeGaleria}>
+              <Ionicons name="image-outline" size={20} color="#007AFF" />
+              <Text style={styles.actionButtonText}>Seleccionar</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {imagenLocal ? (
+            <Image source={{ uri: imagenLocal }} style={styles.imagePreview} />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="image" size={50} color="#888" />
+              <Text style={styles.imagePlaceholderText}>No hay imágenes agregadas</Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      <View style={styles.submitButtonContainer}>
+        <TouchableOpacity style={styles.submitButton} onPress={handleEnviarReporte}>
+          <Text style={styles.submitButtonText}>Entregar reporte</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: '#f0f0f0' },
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#f4f4f8',
+    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight : 20,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContainer: {
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    paddingBottom: 20, 
+  },
   card: {
     backgroundColor: 'white',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 15,
     marginBottom: 15,
+    elevation: 3, 
   },
-  cardTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#000',
+  },
+  infoText: {
+    fontSize: 15,
+    color: '#333',
+    marginBottom: 5,
+  },
+  infoLabel: {
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  textInputContainer: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 10,
+    minHeight: 120,
+  },
   textInput: {
     height: 100,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
+    padding: 0, 
     textAlignVertical: 'top',
+    color: '#000',
+    fontSize: 15,
+  },
+  charCount: {
+    textAlign: 'right',
+    color: 'gray',
+    fontSize: 12,
+    marginTop: 5,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e6f2ff',
+    borderColor: '#007AFF',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginHorizontal: 5, 
+  },
+  actionButtonText: {
+    color: '#007AFF',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  imagePlaceholder: {
+    height: 150,
+    backgroundColor: '#e9e9e9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  imagePlaceholderText: {
+    color: '#888', 
+    marginTop: 8,
+    fontSize: 15,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f4f4f8',
+    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight : 20,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+    color: '#333',
   },
-  charCount: { textAlign: 'right', color: 'gray', fontSize: 12, marginTop: 5 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
-  imagePreview: { width: '100%', height: 200, borderRadius: 5, marginTop: 10 },
-  imagePlaceholder: {
-    height: 150,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
+
+  submitButtonContainer: {
+    padding: 15,
+    backgroundColor: '#f4f4f8', 
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  submitButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    borderRadius: 10,
     alignItems: 'center',
-    borderRadius: 5,
-    marginTop: 10,
+    justifyContent: 'center',
+    elevation: 2,
   },
-}); 
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});

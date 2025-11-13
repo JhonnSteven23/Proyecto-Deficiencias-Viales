@@ -6,8 +6,13 @@ export default function AutoridadTabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#007AFF', 
-        headerShown: true,
+        headerShown: true, 
+        tabBarStyle: {
+          backgroundColor: '#007AFF', 
+          borderTopWidth: 0, 
+        },
+        tabBarActiveTintColor: '#FFFFFF', 
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)', 
       }}>
       
       <Tabs.Screen
@@ -20,18 +25,7 @@ export default function AutoridadTabsLayout() {
           ),
         }}
       />
-
-      <Tabs.Screen
-        name="mapa"
-        options={{
-          title: 'Mapa',
-          headerTitle: 'Mapa de Deficiencias',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map-outline" size={size} color={color} />
-          ),
-        }}
-      />
-
+      
       <Tabs.Screen
         name="avisos"
         options={{
@@ -39,17 +33,6 @@ export default function AutoridadTabsLayout() {
           headerTitle: 'Historial de Avisos',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications-outline" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="informes"
-        options={{
-          title: 'Informes',
-          headerTitle: 'Informes y Estadísticas',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bar-chart-outline" size={size} color={color} />
           ),
         }}
       />

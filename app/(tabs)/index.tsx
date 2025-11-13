@@ -66,7 +66,7 @@ export default function HomeScreen() {
         let nextIndex = (currentImageIndex + 1) % headerImages.length;
         flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
         setCurrentImageIndex(nextIndex);
-    }, 3000); 
+    }, 4000); 
     return () => clearInterval(interval); 
   }, [currentImageIndex]); 
 
