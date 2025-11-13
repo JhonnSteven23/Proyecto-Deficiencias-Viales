@@ -119,7 +119,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" backgroundColor="#f4f4f8" />  
       {renderHeaderCarousel()}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.subHeader}>Tus reportes:</Text>
