@@ -2,8 +2,8 @@ import { useAuth } from '@/context/AuthContext';
 import { onSignOut } from '@/services/auth';
 import { FIREBASE_DB } from '@/services/firebase';
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location'; // 👈 3. Importar Location
-import * as Notifications from 'expo-notifications'; // 👈 2. Importar Notifications
+import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
@@ -11,10 +11,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Linking // 👈 1. Importar Linking
-  ,
-
-
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -23,16 +20,11 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-
-// --- LÓGICA DE ESTADÍSTICAS ---
 interface ProfileStats {
   asignados: number;
   completados: number;
 }
 
-// --- LÓGICA PARA OBTENER PUSH TOKEN ---
-// (Esta es la misma función que usamos en AuthContext)
-// La copiamos aquí para mantener este componente independiente.
 async function registerForPushNotificationsAsync(): Promise<string | null> {
   let token;
   if (Platform.OS === 'android') {
