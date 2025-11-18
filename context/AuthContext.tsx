@@ -9,44 +9,46 @@ interface AuthContextType {
   user: User | null;         
   profile: any | null;       
   isLoading: boolean;        
+  setProfile: React.Dispatch<React.SetStateAction<any | null>>; 
 }
-
 const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   isLoading: true,
+  setProfile: () => {},
 });
 
 async function registerForPushNotificationsAsync(): Promise<string | null> {
-  let token;
+    let token;
 
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
 
-  if (finalStatus !== 'granted') {
-    alert('¡Error! No se pudo obtener el token para las notificaciones push.');
-    return null;
-  }
+    if (finalStatus !== 'granted') {
+      alert('¡Error! No se pudo obtener el token para las notificaciones push.');
+      return null;
+    }
 
-  token = (await Notifications.getExpoPushTokenAsync()).data;
-  console.log("Expo Push Token:", token);
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log("Expo Push Token:", token);
 
-  return token;
+    return token;
 }
+
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -93,12 +95,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, profile, isLoading }}>
+    <AuthContext.Provider value={{ user, profile, isLoading, setProfile }}> 
       {children}
     </AuthContext.Provider>
   );
 };
-
 export const useAuth = () => {
   return useContext(AuthContext);
 };

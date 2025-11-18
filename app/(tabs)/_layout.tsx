@@ -1,8 +1,46 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
+import { FIREBASE_DB } from '../../services/firebase';
 
-export default function AutoridadTabsLayout() {
+function TabBarIcon({ name, color, size, badgeCount }: { name: any; color: string; size: number; badgeCount: number }) {
+  return (
+    <View style={{ width: size, height: size }}>
+      <Ionicons name={name} size={size} color={color} />
+      {badgeCount > 0 && (
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>
+            {badgeCount > 9 ? '9+' : badgeCount}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+export default function ReporteroTabsLayout() { 
+  const { profile } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!profile) return;
+    const q = query(
+      collection(FIREBASE_DB, "notificaciones"),
+      where("userId", "==", profile.uid),
+      where("leido", "==", false)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      setUnreadCount(querySnapshot.size); 
+    });
+
+    return () => unsubscribe(); 
+  }, [profile]);
+
+
   return (
     <Tabs
       screenOptions={{
@@ -32,7 +70,12 @@ export default function AutoridadTabsLayout() {
           title: 'Avisos',
           headerTitle: 'Historial de Avisos',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications-outline" size={size} color={color} />
+            <TabBarIcon 
+              name="notifications-outline" 
+              color={color} 
+              size={size} 
+              badgeCount={unreadCount} 
+            />
           ),
         }}
       />
@@ -47,6 +90,35 @@ export default function AutoridadTabsLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+              name="[reporteId]" 
+              options={{
+                href: null, 
+                headerTitle: 'Detalle del Reporte',
+              }}
+            />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badgeContainer: {
+    position: 'absolute',
+    right: -8,
+    top: -4,    
+    backgroundColor: 'red',
+    borderRadius: 9,
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+});

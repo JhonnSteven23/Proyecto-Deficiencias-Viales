@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Button, Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Rating } from 'react-native-ratings';
-import { FIREBASE_DB } from '../services/firebase';
+import { FIREBASE_DB } from '../../services/firebase';
 
 export interface Reporte {
   id: string; 

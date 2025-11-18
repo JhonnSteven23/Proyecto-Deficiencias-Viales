@@ -1,29 +1,18 @@
 import { useAuth } from '@/context/AuthContext';
 import { onGoogleButtonPress } from '@/services/auth';
-import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
-  const router = useRouter();
-  const { profile, isLoading } = useAuth(); 
-
-  useEffect(() => {
-    if (!isLoading && profile) {
-      if (profile.role === 'admin') {
-        router.replace('/(admin)');
-      } else if (profile.role === 'autoridad') {
-        router.replace('/(autoridad)');
-      } else {
-        router.replace('/(tabs)');
-      }
-    }
-  }, [profile, isLoading]); 
-
+  const { isLoading } = useAuth(); 
   const handleLogin = async () => {
-    const newProfile = await onGoogleButtonPress(); 
-    if (!newProfile) {
-      Alert.alert("Error", "No se pudo iniciar sesión. Intenta de nuevo.");
+    try {
+      const newProfile = await onGoogleButtonPress(); 
+      if (!newProfile) {
+        Alert.alert("Error", "No se pudo iniciar sesión. Intenta de nuevo.");
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
