@@ -151,7 +151,11 @@ export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporte
     }
 
     const titulo = "Actualización de tu Reporte";
-    const cuerpo = `Tu reporte de ${dataDespues.tipo} ha cambiado a: ${nuevoStatus}`;
+    let cuerpo = `Tu reporte de ${dataDespues.tipo} ha cambiado a: ${nuevoStatus}`;
+
+    if (nuevoStatus === "Rechazado" && dataDespues.razonRechazo) {
+      cuerpo = `Tu reporte fue rechazado. Razón: ${dataDespues.razonRechazo}`;
+    }
 
     const notificacionData = {
       userId: userId, 
@@ -161,6 +165,7 @@ export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporte
       cuerpo: cuerpo,
       leido: false,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      razonRechazo: dataDespues.razonRechazo || null,
     };
 
     const message = {

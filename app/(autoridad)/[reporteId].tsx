@@ -1,21 +1,26 @@
+import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Button, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { FIREBASE_DB } from '../../services/firebase';
+import uuid from "react-native-uuid";
+import { useAuth } from '../../context/AuthContext';
+import { FIREBASE_DB, FIREBASE_STORAGE } from '../../services/firebase';
 
 export interface Reporte {
-  id: string;
-  tipo: string;
-  descripcion: string;
-  imagenUrl: string;
-  status: string;
-  createdAt: any; 
-  ubicacion: {
-    latitude: number;
-    longitude: number;
-  };
+  id: string;
+  userId: string;
+  tipo: string;
+  descripcion: string;
+  imagenUrl: string;
+  status: string;
+  createdAt: any; 
+  ubicacion: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 const actualizarEstadoReporte = async (id: string, nuevoStatus: string) => {
@@ -37,6 +42,13 @@ export default function AutoridadReporteDetalle() {
   const { reporteId } = useLocalSearchParams();
   const router = useRouter(); 
 
+  const { profile } = useAuth();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [razonRechazo, setRazonRechazo] = useState('');
+
+  const [imagenSolucion, setImagenSolucion] = useState<string | null>(null);
+
   const [reporte, setReporte] = useState<Reporte | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,14 +69,13 @@ export default function AutoridadReporteDetalle() {
     fetchReporte();
   }, [reporteId]);
 
-  const handleActualizar = async (nuevoStatus: string) => {
+  const handleActualizar = async (nuevoStatus: string, extraData: any = {}) => {
     if (!reporte) return;
     setIsLoading(true);
-    const exito = await actualizarEstadoReporte(reporte.id, nuevoStatus);
-    setIsLoading(false);
 
     let updateData: any = {
       status: nuevoStatus,
+      ...extraData,
     };
 
     if (nuevoStatus === 'En progreso') {
@@ -85,10 +96,86 @@ export default function AutoridadReporteDetalle() {
       console.error("Error al actualizar estado: ", error);
       Alert.alert("Error", "Hubo un problema al actualizar el reporte.");
     }
+  };
 
-    if (exito) {
-      Alert.alert("Éxito", `El reporte ha sido marcado como "${nuevoStatus}".`);
-      router.back();
+
+  const handleCompletarReporte = async () => {
+    if (profile) {
+      console.log("====================================");
+      console.log("UID DE AUTORIDAD LOGUEADO:", profile.uid);
+      console.log("====================================");
+    } else {
+      console.log("PERFIL DE AUTORIDAD NO ENCONTRADO");
+    }
+      if (!imagenSolucion || !reporte) {
+        Alert.alert("Error", "Debes adjuntar una foto de la solución.");
+        return;
+      }
+      setIsLoading(true);
+
+      try {
+        const reportUUID = uuid.v4() as string;
+        const fileExtension = imagenSolucion.split('.').pop();
+        const storagePath = `reportes/${reporte.userId}/${reporte.id}/solucion_${reportUUID}.${fileExtension}`; 
+
+        const imageUrl = await uploadImageAsync(imagenSolucion, storagePath);
+
+        await handleActualizar('Completado', {
+          imagenSolucionUrl: imageUrl,
+          storagePathSolucion: storagePath
+        });
+
+      } catch (error) {
+        console.error("Error al completar reporte: ", error);
+        Alert.alert("Error", "Hubo un problema al subir la foto.");
+        setIsLoading(false);
+      }
+  };
+
+  const tomarFoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permiso requerido', 'Se necesita permiso para usar la cámara.');
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      setImagenSolucion(result.assets[0].uri);
+    }
+  };
+
+  const seleccionarDeGaleria = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permiso requerido', 'Se necesita permiso para acceder a la galería.');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      setImagenSolucion(result.assets[0].uri);
+    }
+  };
+
+  const uploadImageAsync = async (uri: string, path: string): Promise<string> => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const storageRef = ref(FIREBASE_STORAGE, path);
+      await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
+      return downloadURL;
+    } catch (error) {
+      console.error("Error subiendo imagen: ", error);
+      throw new Error("Error al subir la imagen.");
     }
   };
 
@@ -107,9 +194,8 @@ export default function AutoridadReporteDetalle() {
   return (
     <ScrollView style={styles.container}>
       <Stack.Screen options={{ title: `Reporte: ${reporte.tipo}` }} />
-
       <Image source={{ uri: reporte.imagenUrl }} style={styles.image} />
-      
+
       <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Resumen del Reporte</Text>
@@ -145,7 +231,7 @@ export default function AutoridadReporteDetalle() {
             <View style={styles.buttonRow}>
               <Button 
                 title="Rechazar" 
-                onPress={() => handleActualizar('Rechazado')} 
+                onPress={() => setModalVisible(true)} 
                 color="#dc3545"
               />
               <Button 
@@ -155,21 +241,83 @@ export default function AutoridadReporteDetalle() {
               />
             </View>
           )}
+
           {reporte.status === 'En progreso' && (
-            <Button 
-              title="Marcar como Completado" 
-              onPress={() => handleActualizar('Completado')}
-              color="#007bff"
-            />
-          )}
-          {reporte.status === 'Completado' && (
-            <Text>Este reporte ya ha sido completado.</Text>
-          )}
+              <View>
+                <Text style={styles.label}>Evidencia de Solución (Requerido)</Text>
+
+                <View style={styles.buttonRow}>
+                  <Button title="Tomar Foto" onPress={tomarFoto} />
+                  <Button title="Galería" onPress={seleccionarDeGaleria} />
+                </View>
+
+                {imagenSolucion ? (
+                  <Image source={{ uri: imagenSolucion }} style={styles.imagePreview} /> 
+                ) : (
+                  <View style={styles.imagePlaceholder}>
+                    <Text>Sube una foto del trabajo completado</Text>
+                  </View>
+                )}
+
+                <Button 
+                  title="Marcar como Completado" 
+                  onPress={handleCompletarReporte}
+                  color="#007bff"
+                  disabled={!imagenSolucion || isLoading}
+                />
+              </View>
+            )}
            {reporte.status === 'Rechazado' && (
             <Text>Este reporte fue rechazado.</Text>
           )}
         </View>
       </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Razón del Rechazo</Text>
+              <Text style={styles.modalSubtitle}>Por favor, explica por qué se rechaza este reporte.</Text>
+              <Button title="Foto incorrecta" onPress={() => setRazonRechazo('Foto incorrecta')} />
+              <Button title="Ubicación errónea" onPress={() => setRazonRechazo('Ubicación errónea')} />
+
+              <TextInput
+                style={styles.modalTextInput}
+                placeholder="Otra razón (ej. duplicado, fuera de área...)"
+                value={razonRechazo}
+                onChangeText={setRazonRechazo}
+                multiline
+              />
+              <View style={styles.modalButtonRow}>
+                <Button 
+                    title="Cancelar" 
+                    onPress={() => {
+                      setModalVisible(false);
+                      setRazonRechazo('');
+                    }} 
+                    color="#888"
+                  />
+                <Button 
+                  title="Confirmar Rechazo" 
+                  onPress={() => {
+                    if (razonRechazo.trim().length < 5) {
+                      Alert.alert("Error", "La razón debe tener al menos 5 caracteres.");
+                      return;
+                    }
+                    handleActualizar('Rechazado', { razonRechazo: razonRechazo });
+                    setModalVisible(false);
+                    setRazonRechazo('');
+                  }} 
+                  color="#dc3545"
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
     </ScrollView>
   );
 }
@@ -218,5 +366,70 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-around', 
     marginTop: 15 
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)', 
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+
+  modalView: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 6,
+    color: '#222',
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalTextInput: {
+    height: 100,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
+    padding: 12,
+    textAlignVertical: 'top',
+    fontSize: 14,
+    marginTop: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    gap: 10,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  imagePlaceholder: {
+    height: 150,
+    backgroundColor: '#e9e9e9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginTop: 10,
   },
 });
