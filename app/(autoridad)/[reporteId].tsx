@@ -124,7 +124,7 @@ export default function AutoridadReporteDetalle() {
       try {
         const reportUUID = uuid.v4() as string;
         const fileExtension = imagenSolucion.split('.').pop();
-        const storagePath = `reportes/${reporte.userId}/${reporte.id}/solucion_${reportUUID}.${fileExtension}`; 
+        const storagePath = `soluciones/${reporte.id}/solucion_${reportUUID}.${fileExtension}`;
 
         const imageUrl = await uploadImageAsync(imagenSolucion, storagePath);
 
