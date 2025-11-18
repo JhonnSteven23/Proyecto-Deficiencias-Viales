@@ -87,6 +87,9 @@ export default function DetalleScreen() {
       const fileExtension = reportData.imagenUri.split('.').pop();
       const storagePath = `reportes/${profile.uid}/${reportUUID}.${fileExtension}`;
       const imageUrl = await uploadImageAsync(reportData.imagenUri, storagePath);
+
+      const timestamp = serverTimestamp();
+
       const reporteDocument = {
         tipo: reportData.tipo,
         ubicacion: {
@@ -97,10 +100,23 @@ export default function DetalleScreen() {
         imagenUrl: imageUrl, 
         storagePath: storagePath, 
         userId: profile.uid,
-        userDisplayName: profile.displayName || "Anónimo",
-        userPhotoURL: profile.photoURL || null,
+
+        reporteroInfo: {
+          nombre: profile.displayName || "Anónimo",
+          email: profile.email || "No disponible", 
+          photoURL: profile.photoURL || null,
+        },
+
         status: "En espera", 
-        createdAt: serverTimestamp(),
+        createdAt: timestamp, 
+
+        activityLog: [
+          {
+            status: "Reporte Creado",
+            timestamp: new Date(),
+            userId: profile.uid,
+          }
+        ]
       };
 
       const docRef = await addDoc(collection(FIREBASE_DB, "reportes"), reporteDocument);

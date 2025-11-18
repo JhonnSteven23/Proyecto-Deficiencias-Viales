@@ -17,6 +17,17 @@ export interface Reporte {
     latitude: number;
     longitude: number;
   };
+
+  reporteroInfo: {
+    nombre: string;
+    email: string;
+    photoURL?: string;
+  };
+  activityLog: {
+    status: string;
+    timestamp: any;
+    userId: string;
+  }[];
   
   razonRechazo?: string;
   imagenSolucionUrl?: string; 
@@ -171,6 +182,38 @@ export default function ReporteDetalleScreen() {
           </MapView>
         </View>
 
+        {reporte.reporteroInfo && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Reportero</Text>
+            <Text style={styles.cardRow}>
+              <Text style={styles.label}>Nombre: </Text>
+              {reporte.reporteroInfo.nombre}
+            </Text>
+            <Text style={styles.cardRow}>
+              <Text style={styles.label}>Contacto: </Text>
+              {reporte.reporteroInfo.email}
+            </Text>
+          </View>
+        )}
+
+        {reporte.activityLog && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Registro de actividad</Text>
+            {reporte.activityLog
+              .sort((a, b) => a.timestamp?.seconds - b.timestamp?.seconds)
+              .map((log, index) => (
+                <View key={index} style={styles.logEntry}>
+                  <View>
+                    <Text style={styles.logStatus}>{log.status}</Text>
+                    <Text style={styles.logTimestamp}>
+                      {log.timestamp?.toDate().toLocaleDateString()} - {log.timestamp?.toDate().toLocaleTimeString()}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+          </View>
+        )}
+
         {reporte.status === 'Completado' && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Calificación del Trabajo</Text>
@@ -288,5 +331,22 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     borderWidth: 1,
     borderColor: '#e0e0e0',
-  }
+  },
+  logEntry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  logStatus: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  logTimestamp: {
+    fontSize: 12,
+    color: 'gray',
+  },
 });

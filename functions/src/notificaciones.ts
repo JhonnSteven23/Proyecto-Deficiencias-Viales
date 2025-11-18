@@ -67,6 +67,7 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
           tipo: "NuevoReporte",
           titulo: "Nuevo Reporte Asignado",
           cuerpo: `Se ha registrado un nuevo reporte de: ${tipoReporte}`,
+          tipoReporte: tipoReporte,
           leido: false,
           createdAt: timestamp,
         };
@@ -163,6 +164,7 @@ export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporte
       tipo: "CambioEstado",
       titulo: titulo,
       cuerpo: cuerpo,
+      tipoReporte: dataDespues.tipo,
       leido: false,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       razonRechazo: dataDespues.razonRechazo || null,

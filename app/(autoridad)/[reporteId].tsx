@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -70,11 +70,18 @@ export default function AutoridadReporteDetalle() {
   }, [reporteId]);
 
   const handleActualizar = async (nuevoStatus: string, extraData: any = {}) => {
-    if (!reporte) return;
-    setIsLoading(true);
+    if (!reporte || !profile) return; 
+    setIsLoading(true);
+
+    const nuevaEntradaLog = {
+        status: nuevoStatus, 
+        timestamp: new Date(),
+        userId: profile.uid,
+    };
 
     let updateData: any = {
       status: nuevoStatus,
+      activityLog: arrayUnion(nuevaEntradaLog),
       ...extraData,
     };
 
@@ -83,6 +90,7 @@ export default function AutoridadReporteDetalle() {
     } else if (nuevoStatus === 'Completado') {
       updateData.completedAt = serverTimestamp();
     }
+    
     const reporteDocRef = doc(FIREBASE_DB, "reportes", reporte.id);
     try {
       await updateDoc(reporteDocRef, updateData);
