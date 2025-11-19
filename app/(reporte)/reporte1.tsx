@@ -1,13 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import {
-  Image,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { Alert, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useReport } from '../../context/ReportContext';
 
 type TipoReporte = 'Bache' | 'Alcantarilla' | 'Poste';
@@ -47,7 +40,7 @@ export default function TipoReporteScreen() {
       setTipo(selected);
       router.push('/(reporte)/reporte2'); 
     } else {
-      alert('Por favor, selecciona un tipo de deficiencia.');
+      Alert.alert('Por favor, selecciona un tipo de deficiencia.');
     }
   };
 

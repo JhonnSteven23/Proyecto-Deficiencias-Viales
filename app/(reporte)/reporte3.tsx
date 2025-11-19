@@ -21,7 +21,7 @@ export default function DetalleScreen() {
   const tomarFoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      alert('Se necesita permiso para usar la cámara.');
+      Alert.alert('Error', 'Se necesita permiso para usar la cámara.');
       return;
     }
     
@@ -38,7 +38,7 @@ export default function DetalleScreen() {
   const seleccionarDeGaleria = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Se necesita permiso para acceder a la galería.');
+      Alert.alert('Error', 'Se necesita permiso para acceder a la galería.');
       return;
     }
 

@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Button, StyleSheet, View } from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import { useReport } from '../../context/ReportContext';
 
@@ -16,7 +16,7 @@ export default function MapaScreen() {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        alert('Se necesita permiso de ubicación para reportar.');
+        Alert.alert('Error', 'Se necesita permiso de ubicación para reportar.');
         setIsLoading(false);
         return;
       }
@@ -32,7 +32,7 @@ export default function MapaScreen() {
         });
         setMarkerCoord(coords);
       } catch (e) {
-        alert('No se pudo obtener la ubicación.');
+        Alert.alert('Error', 'No se pudo obtener la ubicación.');
       } finally {
         setIsLoading(false);
       }
@@ -48,7 +48,7 @@ export default function MapaScreen() {
       setUbicacion(markerCoord); 
       router.push('/(reporte)/reporte3'); 
     } else {
-      alert('Por favor, marca una ubicación en el mapa.');
+      Alert.alert('Error', 'Por favor, marca una ubicación en el mapa.');
     }
   };
 
