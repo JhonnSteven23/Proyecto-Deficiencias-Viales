@@ -37,9 +37,7 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+      <AuthProvider><RootLayoutNav /></AuthProvider>
   );
 }
 
