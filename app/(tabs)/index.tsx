@@ -72,7 +72,7 @@ export default function HomeScreen() {
 
 
   const iniciarReporte = () => {
-    router.push('/(reporte)/reporte1'); 
+    router.push('/reporte1'); 
   };
   
   const verDetalle = (reporteId: string) => {
