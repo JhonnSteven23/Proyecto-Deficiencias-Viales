@@ -43,8 +43,13 @@ export default function AutoridadTabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#007AFF', 
         headerShown: true, 
+        tabBarStyle: {
+          backgroundColor: '#007AFF', 
+          borderTopWidth: 0, 
+        },
+        tabBarActiveTintColor: '#FFFFFF', 
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)', 
       }}>
       
       <Tabs.Screen

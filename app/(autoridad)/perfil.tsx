@@ -5,21 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
+import * as Updates from 'expo-updates';
 import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 interface ProfileStats {
   asignados: number;
   completados: number;
@@ -139,10 +128,17 @@ export default function PerfilScreen() {
     );
   };
 
-  const handleLogout = () => {
-    router.replace('/'); 
-    onSignOut();
-  };
+   const handleLogout = async () => {
+     try {
+       await onSignOut();
+       await Updates.reloadAsync();
+       
+     } catch (error) {
+       console.error("Error al reiniciar:", error);
+       Alert.alert("Error", "No se pudo reiniciar la aplicación.");
+       router.replace('/'); 
+     }
+   };
 
   if (authLoading || isStatsLoading || isToggleLoading) {
     return (
@@ -162,6 +158,7 @@ export default function PerfilScreen() {
         <Text style={styles.profileName}>{profile?.displayName}</Text>
         <Text style={styles.profileEmail}>{profile?.email}</Text>
         <Text style={styles.profileRole}>(Rol: {profile?.role})</Text>
+        <Text style={styles.profileRole}>(Especialidad: {profile?.especialidad})</Text>
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.statsCard}>
