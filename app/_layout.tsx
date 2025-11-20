@@ -10,7 +10,7 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (isLoading) return;
-    const inAuthGroup = segments[0] === '(tabs)' || segments[0] === '(autoridad)' || segments[0] === '(admin)';
+    const inAuthGroup = segments[0] === '(tabs)' || segments[0] === '(autoridad)' || segments[0] === '(admin)' || segments[0] === '(reporte)';
     if (profile && !inAuthGroup) {
       if (profile.role === 'admin') {
         router.replace('/(admin)');

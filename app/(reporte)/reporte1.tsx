@@ -83,7 +83,6 @@ export default function TipoReporteScreen() {
           <Text style={styles.buttonText}>Continuar</Text>
         </TouchableOpacity>
       </View>
-
     </View>
   );
 }
