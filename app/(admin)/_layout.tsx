@@ -5,19 +5,16 @@ import React from 'react';
 export default function AdminLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerShown: true, 
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-          height: 60,
-          paddingBottom: 5,
-        },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: 'gray',
-      }}
-    >
+          screenOptions={{
+            headerShown: true, 
+            tabBarStyle: {
+              backgroundColor: '#007AFF', 
+              borderTopWidth: 0, 
+            },
+            tabBarActiveTintColor: '#FFFFFF', 
+            tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)', 
+          }}>
+
       <Tabs.Screen
         name="index"
         options={{
