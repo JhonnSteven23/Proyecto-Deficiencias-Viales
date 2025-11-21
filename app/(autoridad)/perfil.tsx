@@ -6,12 +6,18 @@ import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import * as Updates from 'expo-updates';
-import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Modal, Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 interface ProfileStats {
   asignados: number;
   completados: number;
+}
+interface AppConfig {
+  contactoEmail: string;
+  contactoTelefono: string;
+  version: string;
+  acercaDe: string;
 }
 
 async function registerForPushNotificationsAsync(): Promise<string | null> {
@@ -32,7 +38,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
     finalStatus = status;
   }
   if (finalStatus !== 'granted') {
-    Alert.alert('Error', 'No se pudo obtener el token para notificaciones push.');
     return null;
   }
   
@@ -41,25 +46,28 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
       projectId: '366f2cee-7348-4e8a-9077-400b3d35e7d6', 
     });
     token = data;
-    console.log("Nuevo Push Token:", token);
   } catch (e) {
     console.error(e);
-    Alert.alert('Error', 'No se pudo generar el token.');
   }
 
   return token;
 }
-
 
 export default function PerfilScreen() {
   const { profile, isLoading: authLoading } = useAuth();
   const router = useRouter(); 
   
   const [stats, setStats] = useState<ProfileStats>({ asignados: 0, completados: 0 });
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+  
   const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [isToggleLoading, setIsToggleLoading] = useState(false);
+
   const [notificacionesEnabled, setNotificacionesEnabled] = useState(true);
   const [ubicacionEnabled, setUbicacionEnabled] = useState(true);
-  const [isToggleLoading, setIsToggleLoading] = useState(true); 
+
+  const [modalSoporteVisible, setModalSoporteVisible] = useState(false);
+  const [modalAcercaVisible, setModalAcercaVisible] = useState(false);
 
   useEffect(() => {
     if (!profile || !profile.especialidad) {
@@ -78,49 +86,69 @@ export default function PerfilScreen() {
     });
     return () => unsubscribe();
   }, [profile]);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const docRef = doc(FIREBASE_DB, "config", "app_info");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setAppConfig(docSnap.data() as AppConfig);
+        } else {
+          setAppConfig({
+            contactoEmail: "soporte@app.com",
+            contactoTelefono: "70000000",
+            version: "1.0.0",
+            acercaDe: "Información no disponible."
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching config:", error);
+      }
+    };
+    fetchConfig();
+  }, []);
+
   useEffect(() => {
     if (profile) {
       setNotificacionesEnabled(profile.pushToken != null);
       (async () => {
         const { status } = await Location.getForegroundPermissionsAsync();
         setUbicacionEnabled(status === 'granted');
-        setIsToggleLoading(false);
       })();
     }
   }, [profile]);
 
   const handleNotificationToggle = async (newValue: boolean) => {
     if (!profile) return;
-    setNotificacionesEnabled(newValue);
+    setNotificacionesEnabled(newValue); 
     
     try {
       const userDocRef = doc(FIREBASE_DB, "users", profile.uid);
-
       if (newValue === true) {
         setIsToggleLoading(true);
         const token = await registerForPushNotificationsAsync();
         if (token) {
           await updateDoc(userDocRef, { pushToken: token });
-          Alert.alert("Activado", "Las notificaciones se han activado para este dispositivo.");
+          Alert.alert("Activado", "Notificaciones activadas.");
         } else {
           setNotificacionesEnabled(false); 
+          Alert.alert("Permiso requerido", "Ve a ajustes y activa las notificaciones para esta app.");
         }
         setIsToggleLoading(false);
       } else {
         await updateDoc(userDocRef, { pushToken: null });
-        Alert.alert("Desactivado", "Ya no recibirás notificaciones push.");
       }
     } catch (error) {
-      console.error("Error al actualizar pushToken:", error);
+      console.error("Error toggle notif:", error);
       setNotificacionesEnabled(!newValue); 
-      Alert.alert("Error", "No se pudo actualizar la configuración.");
     }
   };
 
-  const handleLocationToggle = () => {
+  const handlePermissionsLink = () => {
     Alert.alert(
-      "Ajustes de Ubicación",
-      "Para cambiar los permisos de ubicación, debes ir a los ajustes de la aplicación.",
+      "Gestionar Permisos",
+      "Para cambiar permisos (Ubicación, Cámara, etc.) debes ir a los ajustes del sistema Android.",
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Abrir Ajustes", onPress: () => Linking.openSettings() } 
@@ -128,38 +156,36 @@ export default function PerfilScreen() {
     );
   };
 
-   const handleLogout = async () => {
-     try {
-       await onSignOut();
-       await Updates.reloadAsync();
-       
-     } catch (error) {
-       console.error("Error al reiniciar:", error);
-       Alert.alert("Error", "No se pudo reiniciar la aplicación.");
-       router.replace('/'); 
-     }
-   };
+  const handleLogout = async () => {
+    try {
+      await onSignOut();
+      await Updates.reloadAsync();
+    } catch (error) {
+      router.replace('/'); 
+    }
+  };
 
-  if (authLoading || isStatsLoading || isToggleLoading) {
+  if (authLoading || isStatsLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.mainContainer}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.headerContainer}>
         <Image 
           source={{ uri: profile?.photoURL || 'https://via.placeholder.com/100' }} 
           style={styles.profileImage} 
         />
-        <Text style={styles.profileName}>{profile?.displayName}</Text>
+        <Text style={styles.profileName}>{profile?.displayName || "Usuario"}</Text>
         <Text style={styles.profileEmail}>{profile?.email}</Text>
         <Text style={styles.profileRole}>(Rol: {profile?.role})</Text>
-        <Text style={styles.profileRole}>(Especialidad: {profile?.especialidad})</Text>
       </View>
+
       <View style={styles.contentContainer}>
         <View style={styles.statsCard}>
           <View style={styles.statItem}>
@@ -172,45 +198,133 @@ export default function PerfilScreen() {
             <Text style={styles.statLabel}>Reportes Completados</Text>
           </View>
         </View>
+
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>CONFIGURACIÓN</Text>
+          <Text style={styles.sectionTitle}>Configuracion</Text>
           <View style={styles.row}>
-            <Ionicons name="notifications-outline" size={22} color="#555" />
-            <Text style={styles.rowLabel}>Notificaciones</Text>
+            <Ionicons name="notifications-outline" size={24} color="#333" />
+            <View style={styles.rowTextContainer}>
+              <Text style={styles.rowLabel}>Notificaciones</Text>
+              <Text style={styles.rowSubLabel}>Recibir actualizaciones de reportes</Text>
+            </View>
             <Switch
               trackColor={{ false: "#767577", true: "#007AFF" }}
-              thumbColor={notificacionesEnabled ? "#f4f3f4" : "#f4f3f4"}
+              thumbColor={notificacionesEnabled ? "#fff" : "#f4f3f4"}
               onValueChange={handleNotificationToggle}
               value={notificacionesEnabled}
+              disabled={isToggleLoading}
             />
           </View>
-          <TouchableOpacity style={styles.row} onPress={handleLocationToggle}>
-            <Ionicons name="location-outline" size={22} color="#555" />
-            <Text style={styles.rowLabel}>Permitir acceso a ubicacion</Text>
+
+          <View style={styles.rowNoBorder}>
+            <Ionicons name="location-outline" size={24} color="#333" />
+            <View style={styles.rowTextContainer}>
+              <Text style={styles.rowLabel}>Ubicacion</Text>
+              <Text style={styles.rowSubLabel}>Permitir acceso a ubicacion</Text>
+            </View>
             <Switch
               trackColor={{ false: "#767577", true: "#007AFF" }}
-              thumbColor={ubicacionEnabled ? "#f4f3f4" : "#f4f3f4"}
-              onValueChange={handleLocationToggle} 
+              thumbColor={ubicacionEnabled ? "#fff" : "#f4f3f4"}
+              onValueChange={handlePermissionsLink} 
               value={ubicacionEnabled}
             />
+          </View>
+        </View>
+
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Informacion</Text>
+          
+          <TouchableOpacity style={styles.row} onPress={() => setModalSoporteVisible(true)}>
+            <Ionicons name="mail-outline" size={24} color="#333" />
+            <View style={styles.rowTextContainer}>
+              <Text style={styles.rowLabel}>Contactar Soporte</Text>
+              <Text style={styles.rowSubLabel}>Obtener ayuda tecnica</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.rowNoBorder} onPress={() => setModalAcercaVisible(true)}>
+            <Ionicons name="information-circle-outline" size={24} color="#333" />
+            <View style={styles.rowTextContainer}>
+              <Text style={styles.rowLabel}>Acerca de</Text>
+              <Text style={styles.rowSubLabel}>Version {appConfig?.version || '1.0.0'}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
         </View>
-        <View style={styles.sectionCard}>
-        </View>
+
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={22} color="#dc3545" />
-          <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+            <Ionicons name="log-out-outline" size={24} color="#D32F2F" style={{marginRight: 10}} />
+            <Text style={styles.logoutButtonText}>Cerrar Sesion</Text>
         </TouchableOpacity>
         
       </View>
     </ScrollView>
+
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={modalSoporteVisible}
+      onRequestClose={() => setModalSoporteVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Soporte Técnico</Text>
+          <Text style={styles.modalText}>
+            Si tienes problemas con la aplicación, contáctanos:
+          </Text>
+          <View style={styles.infoRow}>
+            <Ionicons name="mail" size={20} color="#007AFF" />
+            <Text style={styles.infoText}>{appConfig?.contactoEmail || 'Cargando...'}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="call" size={20} color="#007AFF" />
+            <Text style={styles.infoText}>{appConfig?.contactoTelefono || 'Cargando...'}</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.modalButton} 
+            onPress={() => setModalSoporteVisible(false)}
+          >
+            <Text style={styles.modalButtonText}>Cerrar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={modalAcercaVisible}
+      onRequestClose={() => setModalAcercaVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Acerca de la App</Text>
+          <Text style={styles.versionText}>Versión {appConfig?.version}</Text>
+          <Text style={styles.modalDescription}>
+            {appConfig?.acercaDe || 'Cargando información...'}
+          </Text>
+          <TouchableOpacity 
+            style={styles.modalButton} 
+            onPress={() => setModalAcercaVisible(false)}
+          >
+            <Text style={styles.modalButtonText}>Entendido</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   centered: {
     flex: 1,
@@ -218,82 +332,89 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerContainer: {
-    backgroundColor: '#007AFF',
-    paddingTop: 40,
-    paddingBottom: 20,
+    backgroundColor: '#0066FF', 
+    paddingTop: 60,
+    paddingBottom: 40,
     alignItems: 'center',
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     marginBottom: 10,
     borderWidth: 3,
     borderColor: 'white',
   },
   profileName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
   },
   profileEmail: {
-    fontSize: 16,
-    color: 'white',
-    opacity: 0.8,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 2,
   },
   profileRole: {
-    fontSize: 14,
-    color: 'white',
-    opacity: 0.6,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.7)',
     fontStyle: 'italic',
-    marginTop: 2,
   },
   contentContainer: {
-    padding: 20,
+    paddingHorizontal: 20,
+    top: -25,
   },
   statsCard: {
     flexDirection: 'row',
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
     marginBottom: 20,
-    elevation: 3,
+    elevation: 4,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowRadius: 4,
+    justifyContent: 'space-around',
   },
   statItem: {
-    flex: 1,
     alignItems: 'center',
+    flex: 1,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: '#333',
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
+    marginTop: 2,
   },
   statSeparator: {
     width: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#ddd',
+    height: '80%',
+    alignSelf: 'center',
   },
   sectionCard: {
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 15,
     padding: 20,
     marginBottom: 20,
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
-    color: '#999',
+    color: '#555',
     marginBottom: 15,
+    textTransform: 'capitalize',
   },
   row: {
     flexDirection: 'row',
@@ -301,31 +422,103 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#eee',
   },
-  rowLabel: {
+  rowNoBorder: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rowTextContainer: {
     flex: 1,
-    fontSize: 16,
-    color: '#333',
     marginLeft: 15,
   },
+  rowLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  rowSubLabel: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
   logoutButton: {
-    flexDirection: 'row',
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    borderRadius: 15,
+    paddingVertical: 15,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#ffcccc', 
   },
   logoutButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#dc3545',
+    color: '#D32F2F',
+  },
+  
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 25,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  modalText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  versionText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalDescription: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    alignSelf: 'flex-start',
     marginLeft: 10,
+  },
+  infoText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+  modalButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
