@@ -1,41 +1,54 @@
-import { onSignOut } from '@/services/auth';
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
 
 export default function AdminLayout() {
-  const router = useRouter(); 
-
-  const handleLogout = () => {
-    onSignOut();
-    router.replace('/');
-  };
-
   return (
-    <Stack>
-      <Stack.Screen 
-        name="index" 
-        options={{ 
-          title: 'Panel de Administrador',
-          headerRight: () => (
-            <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
-              <Ionicons 
-                name="log-out-outline" 
-                size={26} 
-                color="#dc3545" 
-              />
-            </TouchableOpacity>
+    <Tabs
+      screenOptions={{
+        headerShown: true, 
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 1,
+          borderTopColor: '#e0e0e0',
+          height: 60,
+          paddingBottom: 5,
+        },
+        tabBarActiveTintColor: '#007AFF',
+        tabBarInactiveTintColor: 'gray',
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Gestión Usuarios',
+          tabBarLabel: 'Usuarios',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people-outline" size={size} color={color} />
           ),
-        }} 
+        }}
       />
-      <Stack.Screen 
-        name="[userId]" 
-        options={{ 
+      
+      <Tabs.Screen
+        name="[userId]"
+        options={{
+          href: null,
           title: 'Editar Usuario',
-          presentation: 'modal', 
-        }} 
+          presentation: 'modal',
+          headerShown: true, 
+        }}
       />
-    </Stack>
+
+      <Tabs.Screen
+        name="perfil"
+        options={{
+          title: 'Perfil Admin',
+          tabBarLabel: 'Mi Perfil',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-circle-outline" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
