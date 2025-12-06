@@ -1,0 +1,20 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible: "Bienvenido a Deficiencias Viales"
+    timeout: 15000 
+
+- tapOn: "Google"
+
+- extendedWaitUntil:
+    visible: "Selecciona una cuenta" 
+    timeout: 10000
+
+- tapOn: "stevenjhon222@gmail.com" 
+
+- extendedWaitUntil:
+    notVisible: "Google"
+    timeout: 10000
