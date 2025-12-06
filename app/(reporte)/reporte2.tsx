@@ -20,7 +20,6 @@ export default function MapaScreen() {
         setIsLoading(false);
         return;
       }
-
       try {
         let location = await Location.getCurrentPositionAsync({});
         const coords = location.coords;
@@ -42,7 +41,6 @@ export default function MapaScreen() {
   const handleMapPress = (event: any) => {
     setMarkerCoord(event.nativeEvent.coordinate);
   };
-
   const handleContinue = () => {
     if (markerCoord) {
       setUbicacion(markerCoord); 
@@ -51,25 +49,14 @@ export default function MapaScreen() {
       Alert.alert('Error', 'Por favor, marca una ubicación en el mapa.');
     }
   };
-
   if (isLoading) {
     return <ActivityIndicator size="large" style={{ flex: 1 }} />;
   }
-
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        region={mapRegion}
-        onPress={handleMapPress}
-        showsUserLocation
-      >
+      <MapView style={styles.map} region={mapRegion} onPress={handleMapPress} showsUserLocation>
         {markerCoord && (
-          <Marker
-            coordinate={markerCoord}
-            draggable
-            onDragEnd={(e) => setMarkerCoord(e.nativeEvent.coordinate)}
-          />
+          <Marker coordinate={markerCoord} draggable onDragEnd={(e) => setMarkerCoord(e.nativeEvent.coordinate)}/>
         )}
       </MapView>
       <View style={styles.buttonContainer}>

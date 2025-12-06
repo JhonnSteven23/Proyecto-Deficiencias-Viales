@@ -24,11 +24,9 @@ export default function DetalleScreen() {
       Alert.alert('Error', 'Se necesita permiso para usar la cámara.');
       return;
     }
-    
     let result = await ImagePicker.launchCameraAsync({
       quality: 0.5,
     });
-
     if (!result.canceled) {
       setImagenLocal(result.assets[0].uri);
       setImagenUri(result.assets[0].uri); 
@@ -41,12 +39,10 @@ export default function DetalleScreen() {
       Alert.alert('Error', 'Se necesita permiso para acceder a la galería.');
       return;
     }
-
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.5,
     });
-
     if (!result.canceled) {
       setImagenLocal(result.assets[0].uri);
       setImagenUri(result.assets[0].uri); 
@@ -87,9 +83,7 @@ export default function DetalleScreen() {
       const fileExtension = reportData.imagenUri.split('.').pop();
       const storagePath = `reportes/${profile.uid}/${reportUUID}.${fileExtension}`;
       const imageUrl = await uploadImageAsync(reportData.imagenUri, storagePath);
-
       const timestamp = serverTimestamp();
-
       const reporteDocument = {
         tipo: reportData.tipo,
         ubicacion: {
@@ -100,16 +94,13 @@ export default function DetalleScreen() {
         imagenUrl: imageUrl, 
         storagePath: storagePath, 
         userId: profile.uid,
-
         reporteroInfo: {
           nombre: profile.displayName || "Anónimo",
           email: profile.email || "No disponible", 
           photoURL: profile.photoURL || null,
         },
-
         status: "En espera", 
         createdAt: timestamp, 
-
         activityLog: [
           {
             status: "Reporte Creado",

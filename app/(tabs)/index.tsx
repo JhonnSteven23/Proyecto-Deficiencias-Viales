@@ -151,11 +151,9 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
       <TouchableOpacity style={styles.reportButton} onPress={iniciarReporte}>
         <Text style={styles.reportButtonText}>Reportar una deficiencia</Text>
       </TouchableOpacity>
-
     </View>
   );
 }

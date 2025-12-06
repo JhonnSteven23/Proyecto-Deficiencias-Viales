@@ -32,7 +32,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
       lightColor: '#FF231F7C',
     });
   }
-
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
   if (existingStatus !== 'granted') {
@@ -42,7 +41,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
   if (finalStatus !== 'granted') {
     return null;
   }
-  
   try {
     const { data } = await Notifications.getExpoPushTokenAsync({
       projectId: '366f2cee-7348-4e8a-9077-400b3d35e7d6', 
@@ -51,7 +49,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
   } catch (e) {
     console.error(e);
   }
-
   return token;
 }
 

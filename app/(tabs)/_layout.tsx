@@ -52,7 +52,6 @@ export default function ReporteroTabsLayout() {
         tabBarActiveTintColor: '#FFFFFF', 
         tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)', 
       }}>
-      
       <Tabs.Screen
         name="index"
         options={{
@@ -63,7 +62,6 @@ export default function ReporteroTabsLayout() {
           ),
         }}
       />
-      
       <Tabs.Screen
         name="avisos"
         options={{
@@ -79,7 +77,6 @@ export default function ReporteroTabsLayout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="perfil"
         options={{
@@ -90,7 +87,6 @@ export default function ReporteroTabsLayout() {
           ),
         }}
       />
-
       <Tabs.Screen
               name="[reporteId]" 
               options={{
