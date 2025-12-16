@@ -54,9 +54,10 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
 }
 
 export default function PerfilScreen() {
+
   const { profile, isLoading: authLoading } = useAuth();
   const router = useRouter(); 
-  
+
   const [stats, setStats] = useState<ProfileStats>({ asignados: 0, completados: 0 });
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
   
@@ -175,6 +176,7 @@ export default function PerfilScreen() {
 
   return (
     <View style={styles.mainContainer}>
+
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.headerContainer}>
         <Image 

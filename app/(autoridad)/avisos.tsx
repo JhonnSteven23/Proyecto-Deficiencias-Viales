@@ -35,6 +35,7 @@ const getIconForReport = (tipoReporte: string) => {
 
 
 export default function AvisosScreen() {
+  
   const router = useRouter();
   const { profile } = useAuth();
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);

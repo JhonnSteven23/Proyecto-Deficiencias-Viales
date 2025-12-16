@@ -96,6 +96,7 @@ const renderScene = SceneMap({
 });
 
 export default function AutoridadHomeScreen() {
+  
   const layout = useWindowDimensions();
   const { profile } = useAuth();
 

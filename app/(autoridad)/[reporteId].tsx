@@ -23,32 +23,13 @@ export interface Reporte {
   };
 }
 
-const actualizarEstadoReporte = async (id: string, nuevoStatus: string) => {
-  try {
-    const reporteDocRef = doc(FIREBASE_DB, "reportes", id);
-    await updateDoc(reporteDocRef, {
-      status: nuevoStatus,
-    });
-    return true; 
-  } catch (error) {
-    console.error("Error al actualizar estado: ", error);
-    Alert.alert("Error", "Hubo un problema al actualizar el reporte.");
-    return false;
-  }
-};
-
-
 export default function AutoridadReporteDetalle() {
   const { reporteId } = useLocalSearchParams();
   const router = useRouter(); 
-
   const { profile } = useAuth();
-
   const [modalVisible, setModalVisible] = useState(false);
   const [razonRechazo, setRazonRechazo] = useState('');
-
   const [imagenSolucion, setImagenSolucion] = useState<string | null>(null);
-
   const [reporte, setReporte] = useState<Reporte | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -108,31 +89,20 @@ export default function AutoridadReporteDetalle() {
 
 
   const handleCompletarReporte = async () => {
-    if (profile) {
-      console.log("====================================");
-      console.log("UID DE AUTORIDAD LOGUEADO:", profile.uid);
-      console.log("====================================");
-    } else {
-      console.log("PERFIL DE AUTORIDAD NO ENCONTRADO");
-    }
       if (!imagenSolucion || !reporte) {
         Alert.alert("Error", "Debes adjuntar una foto de la solución.");
         return;
       }
       setIsLoading(true);
-
       try {
         const reportUUID = uuid.v4() as string;
         const fileExtension = imagenSolucion.split('.').pop();
         const storagePath = `soluciones/${reporte.id}/solucion_${reportUUID}.${fileExtension}`;
-
         const imageUrl = await uploadImageAsync(imagenSolucion, storagePath);
-
         await handleActualizar('Completado', {
           imagenSolucionUrl: imageUrl,
           storagePathSolucion: storagePath
         });
-
       } catch (error) {
         console.error("Error al completar reporte: ", error);
         Alert.alert("Error", "Hubo un problema al subir la foto.");
@@ -146,11 +116,9 @@ export default function AutoridadReporteDetalle() {
       Alert.alert('Permiso requerido', 'Se necesita permiso para usar la cámara.');
       return;
     }
-
     let result = await ImagePicker.launchCameraAsync({
       quality: 0.5,
     });
-
     if (!result.canceled) {
       setImagenSolucion(result.assets[0].uri);
     }
@@ -162,12 +130,10 @@ export default function AutoridadReporteDetalle() {
       Alert.alert('Permiso requerido', 'Se necesita permiso para acceder a la galería.');
       return;
     }
-
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.5,
     });
-
     if (!result.canceled) {
       setImagenSolucion(result.assets[0].uri);
     }
@@ -280,6 +246,7 @@ export default function AutoridadReporteDetalle() {
           )}
         </View>
       </View>
+
         <Modal
           animationType="slide"
           transparent={true}
@@ -326,6 +293,7 @@ export default function AutoridadReporteDetalle() {
             </View>
           </View>
         </Modal>
+
     </ScrollView>
   );
 }
