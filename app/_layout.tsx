@@ -1,12 +1,24 @@
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import * as Notifications from 'expo-notifications';
 import { Slot, useRouter, useSegments } from 'expo-router';
-import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 function RootLayoutNav() {
   const { profile, isLoading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
+
+  const notificationListener = useRef<Notifications.EventSubscription>();
+  const responseListener = useRef<Notifications.EventSubscription>();
 
   useEffect(() => {
     if (isLoading) return;
@@ -23,6 +35,39 @@ function RootLayoutNav() {
       router.replace('/');
     }
   }, [profile, isLoading, segments]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      const data = response.notification.request.content.data;
+      const reporteId = data.reporteId;
+
+      if (reporteId) {
+        if (profile?.role === 'autoridad') {
+             router.push(`/(autoridad)/${reporteId}`);
+        } else {
+             router.push(`/${reporteId}`);
+        }
+      }
+    });
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log("Notificación recibida en primer plano:", notification);
+    });
+
+    return () => {
+      notificationListener.current && notificationListener.current.remove();
+      responseListener.current && responseListener.current.remove();
+    };
+  }, [profile]);
 
   if (isLoading) {
     return (

@@ -5,6 +5,7 @@ import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/fire
 let db: any;
 let expo: any;
 let admin: any;
+
 function initializeApp() {
   if (!admin) {
     logger.info("Realizando Lazy Import de 'firebase-admin'...");
@@ -72,7 +73,6 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
           createdAt: timestamp,
         };
         notificacionPromises.push(db.collection("notificaciones").add(notificacionData));
-
       }
     });
 
@@ -91,10 +91,15 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
       }
       messages.push({
         to: pushToken,
-        sound: "default" as const,
+        sound: "default",
         title: "Nuevo Reporte Asignado",
         body: `Se ha registrado un nuevo reporte de: ${tipoReporte}`,
-        data: { reporteId: reporteId }, 
+        data: { reporteId: reporteId },
+        android: {
+            channelId: "default", 
+            priority: "high",
+            vibrate: [0, 250, 250, 250],
+        }
       });
     }
     if (messages.length > 0) {
@@ -172,10 +177,15 @@ export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporte
 
     const message = {
       to: pushToken,
-      sound: "default" as const,
+      sound: "default",
       title: titulo, 
       body: cuerpo, 
       data: { reporteId: reporteId },
+      android: {
+          channelId: "default", 
+          priority: "high",
+          vibrate: [0, 250, 250, 250],
+      }
     };
 
     try {
@@ -247,10 +257,15 @@ export const notificarAutoridadCalificacion = onDocumentUpdated("reportes/{repor
     if (pushToken && Expo.isExpoPushToken(pushToken)) {
         const message = {
             to: pushToken,
-            sound: "default" as const,
+            sound: "default",
             title: titulo,
             body: cuerpo,
             data: { reporteId: reporteId, screen: "detalle" },
+            android: {
+                channelId: "default",
+                priority: "high",
+                vibrate: [0, 250, 250, 250],
+            }
         };
         promises.push(expo.sendPushNotificationsAsync([message]));
     } else {
