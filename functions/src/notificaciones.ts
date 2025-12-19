@@ -188,3 +188,79 @@ export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporte
       logger.error(`Error al enviar/guardar notificación a ${userId}:`, error);
     }
 });
+
+export const notificarAutoridadCalificacion = onDocumentUpdated("reportes/{reporteId}", async (event) => {
+    initializeApp();
+
+    if (!event.data) {
+        logger.error("No hay datos en el evento de calificación.");
+        return;
+    }
+
+    const dataAntes = event.data.before.data();
+    const dataDespues = event.data.after.data();
+    const reporteId = event.params.reporteId;
+
+    const calificacionAntes = dataAntes.calificacion;
+    const calificacionDespues = dataDespues.calificacion;
+
+    if (!calificacionDespues || calificacionAntes === calificacionDespues) {
+        return;
+    }
+    const autoridadId = dataDespues.autoridadId;
+    if (!autoridadId) {
+        logger.warn(`El reporte ${reporteId} fue calificado pero no tiene autoridadId.`);
+        return;
+    }
+
+    logger.info(`Nueva calificación (${calificacionDespues} estrellas) para reporte ${reporteId}. Notificando a autoridad: ${autoridadId}`);
+
+    const autoridadDocRef = db.collection("users").doc(autoridadId);
+    const autoridadDoc = await autoridadDocRef.get();
+
+    if (!autoridadDoc.exists) {
+        logger.error(`No se encontró el usuario autoridad: ${autoridadId}`);
+        return;
+    }
+
+    const pushToken = autoridadDoc.data()?.pushToken;
+    const { Expo } = require("expo-server-sdk"); 
+
+    const titulo = "¡Recibiste una calificación!";
+    const cuerpo = `Un usuario te ha calificado con ${calificacionDespues} estrellas en el reporte de ${dataDespues.tipo}.`;
+    
+    const notificacionData = {
+        userId: autoridadId,
+        reporteId: reporteId,
+        tipo: "CalificacionRecibida",
+        titulo: titulo,
+        cuerpo: cuerpo,
+        calificacion: calificacionDespues,
+        comentario: dataDespues.comentarioUsuario || "", 
+        leido: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    const promises = [];
+
+    promises.push(db.collection("notificaciones").add(notificacionData));
+    if (pushToken && Expo.isExpoPushToken(pushToken)) {
+        const message = {
+            to: pushToken,
+            sound: "default" as const,
+            title: titulo,
+            body: cuerpo,
+            data: { reporteId: reporteId, screen: "detalle" },
+        };
+        promises.push(expo.sendPushNotificationsAsync([message]));
+    } else {
+        logger.warn(`Autoridad ${autoridadId} no tiene pushToken válido.`);
+    }
+
+    try {
+        await Promise.all(promises);
+        logger.info("Notificación de calificación procesada con éxito.");
+    } catch (error) {
+        logger.error("Error al procesar notificación de calificación:", error);
+    }
+});

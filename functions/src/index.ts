@@ -1,10 +1,10 @@
-
 import {
+  notificarAutoridadCalificacion,
   notificarAutoridadNuevoReporte,
   notificarUsuarioCambioEstado
 } from "./notificaciones";
 
 export {
-  notificarAutoridadNuevoReporte,
+  notificarAutoridadCalificacion, notificarAutoridadNuevoReporte,
   notificarUsuarioCambioEstado
 };
