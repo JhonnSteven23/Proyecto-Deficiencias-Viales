@@ -68,6 +68,7 @@ export default function AutoridadReporteDetalle() {
 
     if (nuevoStatus === 'En progreso') {
       updateData.acceptedAt = serverTimestamp();
+      updateData.autoridadId = profile.uid;
     } else if (nuevoStatus === 'Completado') {
       updateData.completedAt = serverTimestamp();
     }
