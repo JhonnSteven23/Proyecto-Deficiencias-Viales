@@ -1,20 +1,20 @@
-import { useAuth } from '@/context/AuthContext';
-import { FIREBASE_DB } from '@/services/firebase';
 import { useRouter } from 'expo-router';
 import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'; // <--- Importar Image
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
+import { FIREBASE_DB } from '../../services/firebase';
 
 export interface Notificacion {
   id: string;
   userId: string;
   reporteId: string;
   tipo: string;
-  tipoReporte: 'Bache' | 'Alcantarilla' | 'Poste' | string;
+  tipoReporte?: string;
   titulo: string;
   cuerpo: string;
   leido: boolean;
-  createdAt: any; 
+  createdAt: any;
 }
 
 const iconsMap = {
@@ -25,31 +25,25 @@ const iconsMap = {
 };
 
 type ReporteTipo = keyof typeof iconsMap;
-
-const getIconForReport = (tipoReporte: string) => {
-  if (tipoReporte in iconsMap) {
+const getIconForReport = (tipoReporte?: string) => {
+  if (tipoReporte && tipoReporte in iconsMap) {
     return iconsMap[tipoReporte as ReporteTipo];
   }
   return iconsMap['default'];
 };
 
-export default function AvisosScreenUsuario() {
+export default function AvisosScreen() {
   const router = useRouter();
   const { profile } = useAuth();
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!profile) {
-      setIsLoading(false);
-      return;
-    }
+    if (!profile) return;
 
-    const notificacionesRef = collection(FIREBASE_DB, "notificaciones");
-    
     const q = query(
-      notificacionesRef,
-      where("userId", "==", profile.uid), 
+      collection(FIREBASE_DB, "notificaciones"),
+      where("userId", "==", profile.uid),
       orderBy("createdAt", "desc") 
     );
 
@@ -61,119 +55,126 @@ export default function AvisosScreenUsuario() {
       setNotificaciones(notis);
       setIsLoading(false);
     }, (error) => {
-      console.error("Error al obtener notificaciones del usuario: ", error);
+      console.error("Error en notificaciones autoridad:", error);
       setIsLoading(false);
     });
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, [profile]);
 
   const handlePressAviso = async (aviso: Notificacion) => {
     if (!aviso.leido) {
+      setNotificaciones(prev => 
+         prev.map(n => n.id === aviso.id ? {...n, leido: true} : n)
+      );
+      
       const notifDocRef = doc(FIREBASE_DB, "notificaciones", aviso.id);
       try {
         await updateDoc(notifDocRef, { leido: true });
       } catch (error) {
-        console.error("Error al marcar como leído: ", error);
-        Alert.alert("Error", "No se pudo marcar el aviso como leído.");
+        console.error("Error al marcar leído:", error);
       }
     }
-    
+
     if (aviso.reporteId) {
-        router.push(`/${aviso.reporteId}`); 
+        router.push(`/(autoridad)/${aviso.reporteId}`);
     }
   };
 
-
   if (isLoading) {
-    return <ActivityIndicator style={styles.centered} size="large" />;
+    return (
+        <View style={styles.centered}>
+            <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+    );
   }
-
-  const renderItem = ({ item }: { item: Notificacion }) => (
-    <TouchableOpacity 
-      style={[styles.card, !item.leido && styles.cardUnread]}
-      onPress={() => handlePressAviso(item)} 
-    >
-      <Image 
-        source={getIconForReport(item.tipoReporte)} 
-        style={styles.icon} 
-      />
-      
-      {!item.leido && <View style={styles.unreadDot} />}
-      
-      <View style={styles.textContent}>
-        <Text style={[styles.title, !item.leido && styles.titleUnread]}>{item.titulo}</Text>
-        <Text style={styles.body}>{item.cuerpo}</Text>
-        <Text style={styles.date}>
-          {item.createdAt?.toDate().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.container}>
       <FlatList
         data={notificaciones}
-        renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        ListEmptyComponent={(
-            <View style={styles.centered}>
-                <Text style={styles.emptyText}>No tienes avisos.</Text>
+        contentContainerStyle={{ paddingBottom: 20 }}
+        renderItem={({ item }) => (
+          <TouchableOpacity 
+            style={[styles.card, !item.leido && styles.cardUnread]} 
+            onPress={() => handlePressAviso(item)}
+            activeOpacity={0.7}
+          >
+            {!item.leido && <View style={styles.unreadDot} />}
+
+            <Image source={getIconForReport(item.tipoReporte)} style={styles.icon} />
+            
+            <View style={styles.textContainer}>
+              <Text style={[styles.title, !item.leido && styles.titleUnread]} numberOfLines={1}>
+                {item.titulo}
+              </Text>
+              <Text style={styles.body} numberOfLines={2}>
+                  {item.cuerpo}
+              </Text>
+              <Text style={styles.date}>
+                {item.createdAt?.toDate 
+                    ? item.createdAt.toDate().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit' }) 
+                    : 'Reciente'}
+              </Text>
             </View>
+          </TouchableOpacity>
         )}
+        ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No tienes notificaciones pendientes.</Text>
+            </View>
+        }
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  container: { flex: 1, backgroundColor: '#f4f4f8' },
-  emptyText: { textAlign: 'center', marginTop: 50, fontSize: 16, color: 'gray' },
+  emptyContainer: { alignItems: 'center', marginTop: 50 },
+  emptyText: { fontSize: 16, color: '#888' },
+  
   card: {
+    flexDirection: 'row',
     backgroundColor: 'white',
-    borderRadius: 8,
     padding: 15,
-    marginVertical: 4,
-    marginHorizontal: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    position: 'relative',
-    flexDirection: 'row', 
+    marginVertical: 6,
+    marginHorizontal: 12,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   cardUnread: {
-    backgroundColor: '#fffbe6', 
-    borderColor: '#ffc107', 
-    borderWidth: 1,
+    backgroundColor: '#fff', 
+    borderColor: '#007AFF', 
   },
-  icon: { 
-    width: 30,
-    height: 30,
-    marginRight: 10,
-    borderRadius: 5,
-  },
-  textContent: { 
-    flex: 1,
-    paddingLeft: 5, 
-  },
-  title: { fontSize: 16, fontWeight: 'bold' },
-  titleUnread: {
-    fontWeight: '700', 
-  },
-  body: { fontSize: 14, color: '#333', marginTop: 5 },
-  date: { fontSize: 12, color: 'gray', marginTop: 10, textAlign: 'right' },
   unreadDot: {
     position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 5, 
-    backgroundColor: '#007AFF', 
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
+    left: 8,
+    top: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#007AFF',
   },
+  icon: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    marginRight: 15,
+    backgroundColor: '#f0f0f0',
+  },
+  textContainer: { flex: 1 },
+  title: { fontSize: 15, fontWeight: '600', color: '#333', marginBottom: 2 },
+  titleUnread: { fontWeight: '800', color: '#000' },
+  body: { fontSize: 13, color: '#666', lineHeight: 18 },
+  date: { fontSize: 11, color: '#999', marginTop: 6, textAlign: 'right' },
 });

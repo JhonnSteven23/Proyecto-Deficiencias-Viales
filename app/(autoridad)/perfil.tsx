@@ -173,7 +173,7 @@ export default function PerfilScreen() {
       </View>
     );
   }
-
+w
   return (
     <View style={styles.mainContainer}>
 

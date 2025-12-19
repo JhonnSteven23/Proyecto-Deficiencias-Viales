@@ -1,46 +1,40 @@
 import { logger } from "firebase-functions";
-import { setGlobalOptions } from "firebase-functions/v2";
-import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { FirestoreEvent } from "firebase-functions/v2/firestore";
 
 let db: any;
 let expo: any;
 let admin: any;
-function initializeApp() {
+
+function initializeServices() {
   if (!admin) {
-    logger.info("Realizando Lazy Import de 'firebase-admin'...");
     admin = require("firebase-admin");
-    admin.initializeApp();
+    if (admin.apps.length === 0) {
+      admin.initializeApp();
+    }
     db = admin.firestore();
   }
   
   if (!expo) {
-    logger.info("Realizando Lazy Import de 'expo-server-sdk'...");
     const { Expo } = require("expo-server-sdk"); 
     expo = new Expo();
   }
+  
+  return { db, expo, admin };
 }
 
-setGlobalOptions({ region: "southamerica-east1" });
+export async function logicNuevoReporte(event: FirestoreEvent<any>) {
+    const { db, expo, admin } = initializeServices();
 
-export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{reporteId}", async (event) => {
-    initializeApp();
-    if (!event.data) {
-        logger.error("No hay datos en el evento.");
-        return;
-    }
     const reporteData = event.data.data();
     const reporteId = event.params.reporteId; 
 
-    if (!reporteData) {
-        logger.error("No hay datos en el reporte.");
-        return;
-    }
+    if (!reporteData) return;
+    
     const tipoReporte = reporteData.tipo;
-    if (!tipoReporte) {
-        logger.error("El reporte no tiene 'tipo'.");
-        return;
-    }
-    logger.info(`Nuevo reporte creado: ${reporteId}. Tipo: ${tipoReporte}`);
+    if (!tipoReporte) return;
+
+    logger.info(`Nuevo reporte: ${reporteId}. Tipo: ${tipoReporte}`);
+
     const autoridadesRef = db.collection("users");
     const q = autoridadesRef
         .where("role", "==", "autoridad")
@@ -48,143 +42,180 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
     
     const querySnapshot = await q.get();
     if (querySnapshot.empty) {
-      logger.warn(`No se encontraron autoridades para el tipo: ${tipoReporte}`);
-      return;
+        logger.warn(`No hay autoridades para: ${tipoReporte}`);
+        return;
     }
-    const tokens: string[] = [];
 
+    const tokens: string[] = [];
     const notificacionPromises: Promise<any>[] = []; 
     const timestamp = admin.firestore.FieldValue.serverTimestamp();
 
     querySnapshot.forEach((doc: any) => { 
-      const userData = doc.data();
-      if (userData.pushToken) {
-        tokens.push(userData.pushToken);
-
-          const notificacionData = {
-          userId: doc.id, 
-          reporteId: reporteId,
-          tipo: "NuevoReporte",
-          titulo: "Nuevo Reporte Asignado",
-          cuerpo: `Se ha registrado un nuevo reporte de: ${tipoReporte}`,
-          tipoReporte: tipoReporte,
-          leido: false,
-          createdAt: timestamp,
+        const userData = doc.data();
+        const notificacionData = {
+            userId: doc.id, 
+            reporteId: reporteId,
+            tipo: "NuevoReporte",
+            titulo: "Nuevo Reporte Asignado",
+            cuerpo: `Se ha registrado un nuevo reporte de: ${tipoReporte}`,
+            tipoReporte: tipoReporte,
+            leido: false,
+            createdAt: timestamp,
         };
         notificacionPromises.push(db.collection("notificaciones").add(notificacionData));
 
-      }
+        if (userData.pushToken) {
+            tokens.push(userData.pushToken);
+        }
     });
 
+    if (tokens.length > 0) {
+        const { Expo } = require("expo-server-sdk"); 
+        const messages = [];
+        for (const pushToken of tokens) {
+            if (!Expo.isExpoPushToken(pushToken)) continue;
+            
+            messages.push({
+                to: pushToken,
+                sound: "default",
+                title: "Nuevo Reporte Asignado",
+                body: `Se ha registrado un nuevo reporte de: ${tipoReporte}`,
+                data: { reporteId: reporteId }, 
+            });
+        }
+        
+        if (messages.length > 0) {
+            try {
+                await Promise.all([
+                    expo.sendPushNotificationsAsync(messages),
+                    ...notificacionPromises 
+                ]);
+            } catch (error) {
+                logger.error("Error enviando notificaciones nuevo reporte:", error);
+            }
+        }
+    }
+}
 
-    if (tokens.length === 0) {
-      logger.warn("Las autoridades encontradas no tienen pushTokens.");
-      return;
-    }
-    const { Expo } = require("expo-server-sdk"); 
+export async function logicCambioEstado(event: FirestoreEvent<any>) {
+    const { db, expo, admin } = initializeServices();
 
-    const messages = [];
-    for (const pushToken of tokens) {
-      if (!Expo.isExpoPushToken(pushToken)) { 
-        logger.error(`Token inválido: ${pushToken}`);
-        continue;
-      }
-      messages.push({
-        to: pushToken,
-        sound: "default" as const,
-        title: "Nuevo Reporte Asignado",
-        body: `Se ha registrado un nuevo reporte de: ${tipoReporte}`,
-        data: { reporteId: reporteId }, 
-      });
-    }
-    if (messages.length > 0) {
-      logger.info(`Enviando ${messages.length} notificaciones...`);
-      try {
-        await Promise.all([
-          expo.sendPushNotificationsAsync(messages),
-          ...notificacionPromises 
-        ]);
-        logger.info(`Notificaciones push enviadas y guardadas en DB.`);
-      } catch (error) {
-        logger.error("Error al enviar notificaciones:", error);
-      }
-    }
-});
-
-export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporteId}", async (event) => {
-    initializeApp();
-    
-    if (!event.data) {
-        logger.error("No hay datos en el evento onUpdate.");
-        return;
-    }
-    
     const dataAntes = event.data.before.data();
     const dataDespues = event.data.after.data();
     const reporteId = event.params.reporteId; 
 
-    if (dataAntes.status === dataDespues.status) {
-        logger.info("El estado no cambió, no se notifica.");
-        return;
-    }
+    if (dataAntes.status === dataDespues.status) return;
 
     const nuevoStatus = dataDespues.status;
     const userId = dataDespues.userId;
-    if (!userId) {
-      logger.error("El reporte no tiene userId.");
-      return;
-    }
-    logger.info(`Reporte ${reporteId} cambió a: ${nuevoStatus}. Notificando a: ${userId}`);
-    
+
+    if (!userId) return;
+
     const userDocRef = db.collection("users").doc(userId);
     const userDoc = await userDocRef.get();
 
-    if (!userDoc.exists) {
-      logger.error(`No se encontró el usuario: ${userId}`);
-      return;
-    }
+    if (!userDoc.exists) return;
+
     const pushToken = userDoc.data()?.pushToken;
     const { Expo } = require("expo-server-sdk"); 
-
-    if (!pushToken || !Expo.isExpoPushToken(pushToken)) {
-      logger.warn(`Usuario ${userId} no tiene un pushToken válido.`);
-      return;
-    }
 
     const titulo = "Actualización de tu Reporte";
     let cuerpo = `Tu reporte de ${dataDespues.tipo} ha cambiado a: ${nuevoStatus}`;
 
     if (nuevoStatus === "Rechazado" && dataDespues.razonRechazo) {
-      cuerpo = `Tu reporte fue rechazado. Razón: ${dataDespues.razonRechazo}`;
+        cuerpo = `Tu reporte fue rechazado. Razón: ${dataDespues.razonRechazo}`;
     }
 
     const notificacionData = {
-      userId: userId, 
-      reporteId: reporteId,
-      tipo: "CambioEstado",
-      titulo: titulo,
-      cuerpo: cuerpo,
-      tipoReporte: dataDespues.tipo,
-      leido: false,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      razonRechazo: dataDespues.razonRechazo || null,
+        userId: userId, 
+        reporteId: reporteId,
+        tipo: "CambioEstado",
+        titulo: titulo,
+        cuerpo: cuerpo,
+        tipoReporte: dataDespues.tipo,
+        leido: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        razonRechazo: dataDespues.razonRechazo || null,
     };
 
-    const message = {
-      to: pushToken,
-      sound: "default" as const,
-      title: titulo, 
-      body: cuerpo, 
-      data: { reporteId: reporteId },
-    };
+    const dbPromise = db.collection("notificaciones").add(notificacionData);
+    const promises = [dbPromise];
+
+    if (pushToken && Expo.isExpoPushToken(pushToken)) {
+        const message = {
+            to: pushToken,
+            sound: "default",
+            title: titulo, 
+            body: cuerpo, 
+            data: { reporteId: reporteId },
+        };
+        promises.push(expo.sendPushNotificationsAsync([message]));
+    }
 
     try {
-      await Promise.all([
-        expo.sendPushNotificationsAsync([message]),
-        db.collection("notificaciones").add(notificacionData) 
-      ]);
-      logger.info(`Notificación de estado enviada a ${userId} y guardada en DB.`);
+        await Promise.all(promises);
     } catch (error) {
-      logger.error(`Error al enviar/guardar notificación a ${userId}:`, error);
+        logger.error(`Error notificando cambio estado a ${userId}:`, error);
     }
-});
+}
+
+export async function logicCalificacionRecibida(event: FirestoreEvent<any>) {
+    const { db, expo, admin } = initializeServices();
+
+    const dataAntes = event.data.before.data();
+    const dataDespues = event.data.after.data();
+    const reporteId = event.params.reporteId;
+
+    if (!dataDespues.calificacion || dataAntes.calificacion === dataDespues.calificacion) {
+        return; 
+    }
+
+    const autoridadId = dataDespues.autoridadId;
+    const estrellas = dataDespues.calificacion;
+    const comentario = dataDespues.comentarioUsuario || "Sin comentario";
+
+    if (!autoridadId) {
+        logger.warn(`Reporte ${reporteId} calificado sin autoridadId asignado.`);
+        return;
+    }
+
+    const autoridadDocRef = db.collection("users").doc(autoridadId);
+    const autoridadDoc = await autoridadDocRef.get();
+
+    if (!autoridadDoc.exists) return;
+
+    const pushToken = autoridadDoc.data()?.pushToken;
+    const { Expo } = require("expo-server-sdk");
+
+    const notificacionData = {
+        userId: autoridadId,
+        reporteId: reporteId,
+        tipo: "CalificacionRecibida",
+        titulo: "¡Te han calificado!",
+        cuerpo: `Has recibido ${estrellas} estrellas ★. Comentario: ${comentario}`,
+        leido: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    const promises = [
+        db.collection("notificaciones").add(notificacionData)
+    ];
+
+    if (pushToken && Expo.isExpoPushToken(pushToken)) {
+        const message = {
+            to: pushToken,
+            sound: "default",
+            title: "¡Nuevo Feedback Recibido!",
+            body: `Un ciudadano calificó tu trabajo con ${estrellas} estrellas.`,
+            data: { reporteId: reporteId },
+        };
+        promises.push(expo.sendPushNotificationsAsync([message]));
+    }
+
+    try {
+        await Promise.all(promises);
+        logger.info(`Notificación de calificación enviada a autoridad ${autoridadId}`);
+    } catch (error) {
+        logger.error("Error enviando notificación de calificación:", error);
+    }
+}
