@@ -40,8 +40,8 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
+      Notifications.setNotificationChannelAsync('alerta_vial', {
+        name: 'Alertas Viales',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#FF231F7C',
