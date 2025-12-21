@@ -96,7 +96,7 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated("reportes/{repor
         body: `Se ha registrado un nuevo reporte de: ${tipoReporte}`,
         data: { reporteId: reporteId },
         android: {
-            channelId: "default", 
+            channelId: "alerta_vial", 
             priority: "high",
             vibrate: [0, 250, 250, 250],
         }
@@ -182,7 +182,7 @@ export const notificarUsuarioCambioEstado = onDocumentUpdated("reportes/{reporte
       body: cuerpo, 
       data: { reporteId: reporteId },
       android: {
-          channelId: "default", 
+          channelId: "alerta_vial", 
           priority: "high",
           vibrate: [0, 250, 250, 250],
       }
@@ -262,7 +262,7 @@ export const notificarAutoridadCalificacion = onDocumentUpdated("reportes/{repor
             body: cuerpo,
             data: { reporteId: reporteId, screen: "detalle" },
             android: {
-                channelId: "default",
+                channelId: "alerta_vial",
                 priority: "high",
                 vibrate: [0, 250, 250, 250],
             }
