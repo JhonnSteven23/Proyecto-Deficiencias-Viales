@@ -19,7 +19,7 @@ function RootLayoutNav() {
   const router = useRouter();
   const segments = useSegments();
 
- const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
@@ -39,14 +39,21 @@ function RootLayoutNav() {
   }, [profile, isLoading, segments]);
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('alerta_vial', {
-        name: 'Alertas Viales',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
+    const registerChannel = async () => {
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('alerta_vial', {
+          name: 'Alertas Viales',
+          importance: Notifications.AndroidImportance.MAX, 
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+          sound: 'default', 
+          lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC, 
+          bypassDnd: true,
+        });
+      }
+    };
+
+    registerChannel();
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       const data = response.notification.request.content.data;
@@ -69,7 +76,7 @@ function RootLayoutNav() {
       notificationListener.current && notificationListener.current.remove();
       responseListener.current && responseListener.current.remove();
     };
-  }, [profile]);
+  }, [profile]); 
 
   if (isLoading) {
     return (

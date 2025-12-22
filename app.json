@@ -22,15 +22,18 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.jhon_steven_23.DeficienciasVialesJhonn",
       "googleServicesFile": "./google-services.json",
-
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBkbBrZ7ByvWL6eSKRfybLzDekIco2pb94"  
+          "apiKey": "AIzaSyBkbBrZ7ByvWL6eSKRfybLzDekIco2pb94"
         }
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "VIBRATE",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED"
       ]
     },
     "web": {
@@ -56,6 +59,14 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Permite que la aplicación acceda a tu ubicación para mostrarla en el mapa y reportar deficiencias."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#007AFF",
+          "defaultChannel": "alerta_vial"
         }
       ]
     ],
