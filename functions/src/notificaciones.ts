@@ -211,8 +211,8 @@ export const notificarAutoridadCalificacion = onDocumentUpdated("reportes/{repor
     const dataDespues = event.data.after.data();
     const reporteId = event.params.reporteId;
 
-    const calificacionAntes = dataAntes.calificacion;
-    const calificacionDespues = dataDespues.calificacion;
+    const calificacionAntes = dataAntes.feedback?.rating;
+    const calificacionDespues = dataDespues.feedback?.rating;
 
     if (!calificacionDespues || calificacionAntes === calificacionDespues) {
         return;
@@ -239,6 +239,8 @@ export const notificarAutoridadCalificacion = onDocumentUpdated("reportes/{repor
     const titulo = "¡Recibiste una calificación!";
     const cuerpo = `Un usuario te ha calificado con ${calificacionDespues} estrellas en el reporte de ${dataDespues.tipo}.`;
     
+    const comentarioUsuario = dataDespues.feedback?.comentario || "";
+
     const notificacionData = {
         userId: autoridadId,
         reporteId: reporteId,
@@ -246,7 +248,7 @@ export const notificarAutoridadCalificacion = onDocumentUpdated("reportes/{repor
         titulo: titulo,
         cuerpo: cuerpo,
         calificacion: calificacionDespues,
-        comentario: dataDespues.comentarioUsuario || "", 
+        comentario: comentarioUsuario,
         leido: false,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
     };
