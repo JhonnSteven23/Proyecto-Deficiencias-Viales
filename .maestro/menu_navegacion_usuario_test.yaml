@@ -1,0 +1,34 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+# 1. Validar estado inicial (Reportes)
+- extendedWaitUntil:
+    visible: "Panel de Reportes"
+    timeout: 10000
+
+# 2. Navegar a AVISOS
+- tapOn: "Avisos"
+
+# 3. Validar cambio de pantalla
+- assertVisible: "Historial de Avisos"
+
+# 4. Validación condicional del empty state
+- runFlow:
+    when:
+      visible: "No tienes avisos"
+    commands:
+      - assertVisible: "No tienes avisos"
+
+# 5. Navegar a PERFIL
+- tapOn: "Perfil"
+
+# 6. Validar pantalla de perfil
+- assertVisible: "Mi Perfil"
+
+# 7. Retorno a INICIO
+- tapOn: "Reportes"
+
+# 8. Validación final
+- assertVisible: "Panel de Reportes"
