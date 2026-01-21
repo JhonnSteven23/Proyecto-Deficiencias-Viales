@@ -1,0 +1,22 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible: "Reporte de deficiencias en Cochabamba"
+    timeout: 10000
+
+- assertVisible: "Tus reportes:"
+- assertVisible: "Puedes reportar baches, alcantarillas y cortes de luz en postes"
+
+- assertVisible: "Reportar una deficiencia"
+
+- scroll
+
+- tapOn: "Reportar una deficiencia"
+
+- assertNotVisible: "Reportar una deficiencia"
+
+- back
+- assertVisible: "Reporte de deficiencias en Cochabamba"
