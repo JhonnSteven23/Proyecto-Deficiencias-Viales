@@ -1,11 +1,67 @@
-import { useAuth } from '@/context/AuthContext';
-import { FIREBASE_DB } from '@/services/firebase';
-import { Ionicons } from '@expo/vector-icons';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useAuth } from "@/context/AuthContext";
+import { FIREBASE_DB } from "@/services/firebase";
+import { endOfDay, isWithinInterval, parseISO, startOfDay } from "date-fns";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Calendar, LocaleConfig } from "react-native-calendars";
+import { BarChart } from "react-native-chart-kit";
+
+LocaleConfig.locales["es"] = {
+  monthNames: [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ],
+  monthNamesShort: [
+    "Ene.",
+    "Feb.",
+    "Mar.",
+    "Abr.",
+    "May.",
+    "Jun.",
+    "Jul.",
+    "Ago.",
+    "Sep.",
+    "Oct.",
+    "Nov.",
+    "Dic.",
+  ],
+  dayNames: [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ],
+  dayNamesShort: ["Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb."],
+  today: "Hoy",
+};
+LocaleConfig.defaultLocale = "es";
+
+const screenWidth = Dimensions.get("window").width;
 
 interface Reporte {
   id: string;
@@ -14,371 +70,524 @@ interface Reporte {
   imagenUrl: string;
   status: string;
   createdAt: any;
-  ubicacion: {
-    latitude: number;
-    longitude: number;
-  };
+  completedAt?: any;
+  ubicacion: { latitude: number; longitude: number };
 }
+
 interface Stats {
   total: number;
   espera: number;
   progreso: number;
   completados: number;
   rechazados: number;
-  avgAceptacionMs: number; 
-  avgSolucionMs: number;   
+  avgAceptacionMs: number;
+  avgSolucionMs: number;
 }
 
 function formatDuration(ms: number): string {
-  if (ms <= 0) return 'N/A';
-  
+  if (ms <= 0) return "0 min";
   const dias = ms / (1000 * 60 * 60 * 24);
-  if (dias >= 1) return `${dias.toFixed(1)} días`;
-  
+  if (dias >= 1) return `${dias.toFixed(0)} días`;
   const horas = ms / (1000 * 60 * 60);
   if (horas >= 1) return `${horas.toFixed(1)} hs`;
-  
   const minutos = ms / (1000 * 60);
   return `${minutos.toFixed(0)} min`;
 }
 
-const StatCard = ({ title, value, iconName }: { title: string, value: string | number, iconName: keyof typeof Ionicons.glyphMap }) => (
-  <View style={styles.statCard}>
-    <Ionicons name={iconName} size={30} color="#007AFF" />
-    <Text style={styles.statValue}>{value}</Text>
-    <Text style={styles.statTitle}>{title}</Text>
+const BigStatCard = ({
+  title,
+  value,
+  color = "#007AFF",
+}: {
+  title: string;
+  value: number;
+  color?: string;
+}) => (
+  <View style={[styles.bigCard, { borderColor: color }]}>
+    <Text style={[styles.bigCardValue, { color }]}>{value}</Text>
+    <Text style={[styles.bigCardTitle, { color }]}>{title}</Text>
   </View>
 );
 
-const generateHTML = (profile: any, stats: Stats, reportes: Reporte[]): string => {
-  const fecha = new Date().toLocaleDateString();
-  const especialidad = profile.especialidad.charAt(0).toUpperCase() + profile.especialidad.slice(1);
+const MediumStatCard = ({ title, value }: { title: string; value: number }) => (
+  <View style={styles.mediumCard}>
+    <Text style={styles.mediumCardValue}>{value}</Text>
+    <Text style={styles.mediumCardTitle}>{title}</Text>
+  </View>
+);
 
-  const styles = `
-    <style>
-      body { font-family: sans-serif; margin: 20px; }
-      h1 { color: #007AFF; }
-      h2 { border-bottom: 2px solid #eee; padding-bottom: 5px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-      th { background-color: #f5f5f5; }
-      .header { text-align: center; }
-      .label { font-weight: bold; }
-      .text-wrap { word-wrap: break-word; }
-    </style>
-  `;
+const TimeMetricCard = ({ title, value }: { title: string; value: string }) => (
+  <View style={styles.timeCard}>
+    <Text style={styles.timeCardValue}>{value}</Text>
+    <Text style={styles.timeCardTitle}>{title}</Text>
+  </View>
+);
 
-  let reportesHtml = '<h2>Detalle de Reportes</h2><table>';
-  reportesHtml += `
-    <tr>
-      <th>ID</th>
-      <th>Tipo</th>
-      <th>Fecha</th>
-      <th>Estado</th>
-      <th>Descripción</th>
-      <th>Enlace Imagen</th>
-    </tr>
-  `;
+const generateHTML = (
+  profile: any,
+  stats: Stats,
+  reportes: Reporte[],
+  dateRange: { start: string | null; end: string | null },
+): string => {
+  const fechaHoy = new Date().toLocaleDateString();
+  const especialidad =
+    profile.especialidad.charAt(0).toUpperCase() +
+    profile.especialidad.slice(1);
+  const rangoTexto =
+    dateRange.start && dateRange.end
+      ? `Del ${dateRange.start} al ${dateRange.end}`
+      : "Histórico Completo";
 
-  for (const reporte of reportes) {
-    reportesHtml += `
-      <tr>
-        <td>${reporte.id.substring(0, 5)}...</td>
-        <td>${reporte.tipo}</td>
-        <td>${reporte.createdAt?.toDate().toLocaleDateString() || 'N/A'}</td>
-        <td>${reporte.status}</td>
-        <td class="text-wrap">${reporte.descripcion.substring(0, 50)}...</td>
-        <td><a href="${reporte.imagenUrl}">Ver Evidencia</a></td>
-      </tr>
-    `;
-  }
-  reportesHtml += '</table>';
-  
-  return `
-    <html>
-      <head>${styles}</head>
-      <body>
-        <div class="header">
-          <h1>Informe de Gestión de Deficiencias</h1>
-          <p>Generado el: ${fecha}</p>
-        </div>
-        
-        <h2>Gestor: ${profile.displayName}</h2>
-        <p><span class="label">Especialidad:</span> ${especialidad}s</p>
-        
-                <h2>Resumen de Productividad</h2>
-        <table>
-          <tr><td>Total Asignados</td><td>${stats.total}</td></tr>
-          <tr><td>Completados</td><td>${stats.completados}</td></tr>
-        </table>
-        <h2>Carga de Trabajo Actual</h2>
-        <table>
-          <tr><td>En Espera</td><td>${stats.espera}</td></tr>
-          <tr><td>En Progreso</td><td>${stats.progreso}</td></tr>
-          <tr><td>Rechazados</td><td>${stats.rechazados}</td></tr>
-        </table>
-        <h2>Optimización de Procesos</h2>
-        <table>
-          <tr><td>Tiempo Prom. Aceptación</td><td>${formatDuration(stats.avgAceptacionMs)}</td></tr>
-          <tr><td>Tiempo Prom. Solución</td><td>${formatDuration(stats.avgSolucionMs)}</td></tr>
-        </table>
+  let reportesHtml = `<h3>Listado de Reportes (${rangoTexto})</h3><table>`;
+  reportesHtml += `
+    <tr>
+      <th>Estado</th>
+      <th>Fecha Creación</th>
+      <th>Fecha Completado</th>
+      <th>Descripción</th>
+    </tr>
+  `;
 
-                ${reportesHtml}
-        
-      </body>
-    </html>
-  `;
+  for (const reporte of reportes) {
+    reportesHtml += `
+      <tr>
+        <td>${reporte.status}</td>
+        <td>${reporte.createdAt?.toDate().toLocaleDateString() || "-"}</td>
+        <td>${reporte.completedAt?.toDate().toLocaleDateString() || "-"}</td>
+        <td class="text-wrap">${reporte.descripcion.substring(0, 60)}...</td>
+      </tr>
+    `;
+  }
+  reportesHtml += "</table>";
+
+  return `
+    <html>
+      <head>
+        <style>
+          body { font-family: Helvetica, sans-serif; padding: 20px; }
+          h1 { color: #007AFF; text-align: center; }
+          h3 { border-bottom: 2px solid #eee; margin-top: 20px; color: #333; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; color: #333; }
+          .stats-grid { display: flex; justify-content: space-between; margin-bottom: 20px; }
+          .stat-box { border: 1px solid #ddd; padding: 10px; width: 48%; text-align: center; border-radius: 8px; }
+          .big-num { font-size: 24px; font-weight: bold; color: #007AFF; display: block; }
+        </style>
+      </head>
+      <body>
+        <h1>Informe de Gestión: ${especialidad}</h1>
+        <p style="text-align:center">Gestor: ${profile.displayName} | Generado: ${fechaHoy}</p>
+        
+        <h3>Métricas Globales</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+             <span class="big-num">${stats.completados}</span>
+             Reportes Completados
+          </div>
+          <div class="stat-box">
+             <span class="big-num">${formatDuration(stats.avgSolucionMs)}</span>
+             Tiempo Promedio Solución
+          </div>
+        </div>
+
+        ${reportesHtml}
+      </body>
+    </html>
+  `;
 };
 
 export default function InformeScreen() {
   const { profile } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [reportes, setReportes] = useState<Reporte[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [reportes, setReportes] = useState<Reporte[]>([]);
 
-    useEffect(() => {
-    if (!profile || !profile.especialidad) {
-      setIsLoading(false);
-      return; 
-    }
+  const [range, setRange] = useState<{
+    start: string | null;
+    end: string | null;
+  }>({ start: null, end: null });
+  const [markedDates, setMarkedDates] = useState<any>({});
 
-    const reportesRef = collection(FIREBASE_DB, "reportes");
-    const q = query(
-      reportesRef,
-      where("tipo", "==", profile.especialidad)
-    );
+  useEffect(() => {
+    if (!profile || !profile.especialidad) {
+      setIsLoading(false);
+      return;
+    }
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const reportesRef = collection(FIREBASE_DB, "reportes");
+    const q = query(reportesRef, where("tipo", "==", profile.especialidad));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedReportes: Reporte[] = [];
-      let espera = 0;
-      let progreso = 0;
-      let completados = 0;
-      let rechazados = 0;
-      
-      let totalTiemposAceptacion = 0;
-      let reportesConAceptacion = 0;
-      let totalTiemposSolucion = 0;
-      let reportesConSolucion = 0;
+      let counts = { espera: 0, progreso: 0, completados: 0, rechazados: 0 };
+      let timeAceptacion = 0,
+        countAcep = 0;
+      let timeSolucion = 0,
+        countSol = 0;
 
-      querySnapshot.forEach((doc) => {
+      snapshot.forEach((doc) => {
         const data = doc.data();
         fetchedReportes.push({ id: doc.id, ...data } as Reporte);
-        const status = data.status;
+
+        switch (data.status) {
+          case "En espera":
+            counts.espera++;
+            break;
+          case "En progreso":
+            counts.progreso++;
+            break;
+          case "Completado":
+            counts.completados++;
+            break;
+          case "Rechazado":
+            counts.rechazados++;
+            break;
+        }
 
         if (data.createdAt && data.acceptedAt) {
-          const tCreacion = data.createdAt.toDate().getTime();
-          const tAceptacion = data.acceptedAt.toDate().getTime();
-          if (tAceptacion > tCreacion) {
-            totalTiemposAceptacion += (tAceptacion - tCreacion);
-            reportesConAceptacion++;
+          const diff =
+            data.acceptedAt.toDate().getTime() -
+            data.createdAt.toDate().getTime();
+          if (diff > 0) {
+            timeAceptacion += diff;
+            countAcep++;
           }
         }
-        
         if (data.acceptedAt && data.completedAt) {
-          const tAceptacion = data.acceptedAt.toDate().getTime();
-          const tCompletado = data.completedAt.toDate().getTime();
-          if (tCompletado > tAceptacion) { 
-            totalTiemposSolucion += (tCompletado - tAceptacion);
-            reportesConSolucion++;
+          const diff =
+            data.completedAt.toDate().getTime() -
+            data.acceptedAt.toDate().getTime();
+          if (diff > 0) {
+            timeSolucion += diff;
+            countSol++;
           }
         }
-
-        switch (status) {
-          case 'En espera': espera++; break;
-          case 'En progreso': progreso++; break;
-          case 'Completado': completados++; break;
-          case 'Rechazado': rechazados++; break;
-        }
       });
 
-      const avgAceptacionMs = reportesConAceptacion > 0 ? totalTiemposAceptacion / reportesConAceptacion : 0;
-      const avgSolucionMs = reportesConSolucion > 0 ? totalTiemposSolucion / reportesConSolucion : 0;
       setReportes(fetchedReportes);
-
       setStats({
-        total: querySnapshot.size,
-        espera,
-        progreso,
-        completados,
-        rechazados,
-        avgAceptacionMs,
-        avgSolucionMs,
+        total: snapshot.size,
+        ...counts,
+        avgAceptacionMs: countAcep ? timeAceptacion / countAcep : 0,
+        avgSolucionMs: countSol ? timeSolucion / countSol : 0,
       });
-      setIsLoading(false);
-
-    }, (error) => {
-      console.error("Error al obtener estadísticas: ", error);
       setIsLoading(false);
     });
 
     return () => unsubscribe();
   }, [profile]);
 
+  const chartData = useMemo(() => {
+    const months = [
+      "Ene",
+      "Feb",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dic",
+    ];
+    const data = new Array(12).fill(0);
+
+    reportes.forEach((r) => {
+      if (r.status === "Completado" && r.completedAt) {
+        const monthIndex = r.completedAt.toDate().getMonth();
+        data[monthIndex]++;
+      }
+    });
+
+    return {
+      labels: months,
+      datasets: [{ data }],
+    };
+  }, [reportes]);
+
+  const handleDayPress = (day: { dateString: string }) => {
+    let newRange = { ...range };
+    let newMarked: any = {};
+
+    if (!range.start || (range.start && range.end)) {
+      newRange = { start: day.dateString, end: null };
+      newMarked[day.dateString] = {
+        startingDay: true,
+        color: "#007AFF",
+        textColor: "white",
+      };
+    } else {
+      const start = range.start;
+      const end = day.dateString;
+
+      if (new Date(end) < new Date(start)) {
+        newRange = { start: end, end: start };
+      } else {
+        newRange = { start, end };
+      }
+
+      newMarked[newRange.start!] = {
+        startingDay: true,
+        color: "#007AFF",
+        textColor: "white",
+      };
+      newMarked[newRange.end!] = {
+        endingDay: true,
+        color: "#007AFF",
+        textColor: "white",
+      };
+    }
+
+    setRange(newRange);
+    setMarkedDates(newMarked);
+  };
 
   const handleGeneratePDF = async () => {
-    if (!stats || !profile || reportes.length === 0) {
-      Alert.alert("Error", "No hay datos para generar el informe.");
-      return;
-    }
+    if (!stats || reportes.length === 0) return;
     setIsGeneratingPDF(true);
+
     try {
-      const html = generateHTML(profile, stats, reportes);
-      
-      const { uri } = await Print.printToFileAsync({ html });
-      console.log('PDF generado en:', uri);
+      let reportesFiltrados = [...reportes];
 
-      if (!(await Sharing.isAvailableAsync())) {
-        Alert.alert("Error", "La función de compartir no está disponible.");
-        return;
+      if (range.start && range.end) {
+        const start = startOfDay(parseISO(range.start));
+        const end = endOfDay(parseISO(range.end));
+
+        reportesFiltrados = reportes.filter((r) => {
+          if (!r.createdAt) return false;
+          const fecha = r.createdAt.toDate();
+          return isWithinInterval(fecha, { start, end });
+        });
       }
-      
-      await Sharing.shareAsync(uri, {
-        mimeType: 'application/pdf',
-        dialogTitle: `Informe de ${profile.especialidad} - ${new Date().toLocaleDateString()}`,
-        UTI: '.pdf'
-      });
 
-    } catch (error) {
-      console.error("Error al generar PDF: ", error);
-      Alert.alert("Error", "No se pudo generar el PDF.");
+      const html = generateHTML(profile, stats, reportesFiltrados, range);
+      const { uri } = await Print.printToFileAsync({ html });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          UTI: ".pdf",
+          mimeType: "application/pdf",
+        });
+      }
+    } catch (e) {
+      Alert.alert("Error", "No se pudo crear el PDF");
     } finally {
       setIsGeneratingPDF(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !stats)
     return <ActivityIndicator style={styles.centered} size="large" />;
-  }
-
-  if (!stats) {
-    return (
-      <View style={styles.centered}>
-        <Text>No se pudieron cargar las estadísticas.</Text>
-      </View>
-    );
-  }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.headerTitle}>Mi Gestión de: {profile?.especialidad}s</Text>
-      
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
+      <Text style={styles.headerTitle}>Informes y Estadísticas</Text>
+      <Text style={styles.subTitle}>
+        Mi gestión de: {profile?.especialidad}s
+      </Text>
+
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Reportes Completados (Mensual)</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <BarChart
+            data={chartData}
+            width={Math.max(screenWidth - 40, 500)}
+            height={220}
+            yAxisLabel=""
+            yAxisSuffix=""
+            chartConfig={{
+              backgroundColor: "#fff",
+              backgroundGradientFrom: "#fff",
+              backgroundGradientTo: "#fff",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              barPercentage: 0.5,
+            }}
+            style={styles.chart}
+            showValuesOnTopOfBars
+          />
+        </ScrollView>
+      </View>
+
       <Text style={styles.sectionTitle}>Productividad Total</Text>
-      <View style={styles.statCardContainer}>
-        <StatCard 
-          title="Total Asignados" 
-          value={stats.total} 
-          iconName="file-tray-full-outline" 
+      <View style={styles.row}>
+        <BigStatCard
+          title="Total Asignados"
+          value={stats.total}
+          color="#007AFF"
         />
-        <StatCard 
-          title="Completados" 
-          value={stats.completados} 
-          iconName="checkmark-circle-outline" 
+        <BigStatCard
+          title="Completados"
+          value={stats.completados}
+          color="#34C759"
         />
       </View>
 
       <Text style={styles.sectionTitle}>Carga de Trabajo Actual</Text>
-      <View style={styles.statCardContainer}>
-        <StatCard 
-          title="En Espera" 
-          value={stats.espera} 
-          iconName="hourglass-outline" 
-        />
-        <StatCard 
-          title="En Progreso" 
-          value={stats.progreso} 
-          iconName="build-outline" 
-        />
+      <View style={styles.row}>
+        <MediumStatCard title="En Espera" value={stats.espera} />
+        <MediumStatCard title="En Progreso" value={stats.progreso} />
       </View>
-       <View style={styles.statCardContainer}>
-        <StatCard 
-          title="Rechazados" 
-          value={stats.rechazados} 
-          iconName="close-circle-outline" 
-        />
+      <View style={{ marginTop: 10 }}>
+        <MediumStatCard title="Rechazados" value={stats.rechazados} />
       </View>
 
-      <Text style={styles.sectionTitle}>Optimización de Procesos</Text>
-      <View style={styles.statCardContainer}>
-        <StatCard 
-          title="Tiempo Prom. Aceptación" 
-          value={formatDuration(stats.avgAceptacionMs)} 
-          iconName="timer-outline" 
+      <Text style={styles.sectionTitle}>Métricas de Trabajo</Text>
+      <View style={styles.row}>
+        <TimeMetricCard
+          title="Tiempo Promedio de Aceptación"
+          value={formatDuration(stats.avgAceptacionMs)}
         />
-        <StatCard 
-          title="Tiempo Prom. Solución" 
+        <TimeMetricCard
+          title="Tiempo Promedio de Solución"
           value={formatDuration(stats.avgSolucionMs)}
-          iconName="speedometer-outline" 
         />
       </View>
 
-      <View style={styles.exportButtonContainer}>
-        {isGeneratingPDF ? (
-          <ActivityIndicator size="large" color="#007AFF" />
-        ) : (
-          <Button
-            title="Generar Informe PDF"
-            onPress={handleGeneratePDF}
-            color="#007AFF"
-          />
-        )}
+      <Text style={styles.sectionTitle}>Generación de informes</Text>
+      <Text style={styles.description}>
+        Elige el rango de fechas para el PDF
+      </Text>
+
+      <View style={styles.calendarContainer}>
+        <Calendar
+          markingType={"period"}
+          markedDates={markedDates}
+          onDayPress={handleDayPress}
+          theme={{
+            selectedDayBackgroundColor: "#007AFF",
+            todayTextColor: "#007AFF",
+            arrowColor: "#007AFF",
+            textMonthFontWeight: "bold",
+          }}
+        />
       </View>
+
+      <TouchableOpacity
+        style={styles.pdfButton}
+        onPress={handleGeneratePDF}
+        disabled={isGeneratingPDF}
+      >
+        {isGeneratingPDF ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.pdfButtonText}>GENERAR INFORME PDF</Text>
+        )}
+      </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  container: {
-    flex: 1,
-    padding: 15,
-    backgroundColor: '#f5f5f5', 
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: { flex: 1, backgroundColor: "#f8f9fa", padding: 20 },
+
+  headerTitle: { fontSize: 22, fontWeight: "bold", color: "#1c1c1e" },
+  subTitle: {
+    fontSize: 18,
+    color: "#333",
     marginBottom: 20,
-    color: '#333',
-    textTransform: 'capitalize', 
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#555',
-    marginTop: 25,
-    marginBottom: 10,
-  },
-  statCardContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  statCard: {
-    flex: 1, 
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    marginHorizontal: 5,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-  },
-  statValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginVertical: 5,
-  },
-  statTitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center', 
+    fontWeight: "600",
   },
 
-  exportButtonContainer: {
-    marginTop: 40,
+  chartContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 10,
+    elevation: 2,
+  },
+  chartTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#555",
+    alignSelf: "flex-start",
+  },
+  chart: { borderRadius: 16 },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1c1c1e",
+    marginTop: 25,
+    marginBottom: 15,
+  },
+  description: { fontSize: 14, color: "#666", marginBottom: 10 },
+
+  row: { flexDirection: "row", justifyContent: "space-between" },
+
+  bigCard: {
+    width: "48%",
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  bigCardValue: { fontSize: 36, fontWeight: "bold", marginBottom: 5 },
+  bigCardTitle: { fontSize: 12, fontWeight: "600" },
+
+  mediumCard: {
+    flex: 1,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    alignItems: "center",
+    marginHorizontal: 5,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  mediumCardValue: { fontSize: 28, fontWeight: "bold", color: "#007AFF" },
+  mediumCardTitle: { fontSize: 12, color: "#666" },
+
+  timeCard: {
+    width: "48%",
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    alignItems: "center",
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#007AFF",
+  },
+  timeCardValue: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#007AFF",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  timeCardTitle: { fontSize: 11, color: "#007AFF", textAlign: "center" },
+
+  calendarContainer: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 10,
+    elevation: 3,
     marginBottom: 20,
   },
+
+  pdfButton: {
+    backgroundColor: "#007AFF",
+    padding: 18,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  pdfButtonText: { color: "white", fontWeight: "bold", fontSize: 16 },
 });
