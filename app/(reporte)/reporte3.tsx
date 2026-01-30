@@ -1,27 +1,39 @@
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import uuid from 'react-native-uuid';
-import { useAuth } from '../../context/AuthContext';
-import { useReport } from '../../context/ReportContext';
-import { FIREBASE_DB, FIREBASE_STORAGE } from '../../services/firebase';
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import uuid from "react-native-uuid";
+import { useAuth } from "../../context/AuthContext";
+import { useReport } from "../../context/ReportContext";
+import { FIREBASE_DB, FIREBASE_STORAGE } from "../../services/firebase";
 
 export default function DetalleScreen() {
   const router = useRouter();
   const { profile } = useAuth();
-  const { reportData, setDescripcion, setImagenUri, limpiarReporte } = useReport();
-  const [descripcionLocal, setDescripcionLocal] = useState('');
+  const { reportData, setDescripcion, setImagenUri, limpiarReporte } =
+    useReport();
+  const [descripcionLocal, setDescripcionLocal] = useState("");
   const [imagenLocal, setImagenLocal] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const tomarFoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Error', 'Se necesita permiso para usar la cámara.');
+    if (status !== "granted") {
+      Alert.alert("Error", "Se necesita permiso para usar la cámara.");
       return;
     }
     let result = await ImagePicker.launchCameraAsync({
@@ -29,14 +41,14 @@ export default function DetalleScreen() {
     });
     if (!result.canceled) {
       setImagenLocal(result.assets[0].uri);
-      setImagenUri(result.assets[0].uri); 
+      setImagenUri(result.assets[0].uri);
     }
   };
 
   const seleccionarDeGaleria = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Error', 'Se necesita permiso para acceder a la galería.');
+    if (status !== "granted") {
+      Alert.alert("Error", "Se necesita permiso para acceder a la galería.");
       return;
     }
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -45,11 +57,14 @@ export default function DetalleScreen() {
     });
     if (!result.canceled) {
       setImagenLocal(result.assets[0].uri);
-      setImagenUri(result.assets[0].uri); 
+      setImagenUri(result.assets[0].uri);
     }
   };
 
-  const uploadImageAsync = async (uri: string, path: string): Promise<string> => {
+  const uploadImageAsync = async (
+    uri: string,
+    path: string,
+  ): Promise<string> => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
@@ -76,13 +91,16 @@ export default function DetalleScreen() {
       Alert.alert("Error", "La descripción debe tener al menos 10 caracteres.");
       return;
     }
-    setIsUploading(true); 
+    setIsUploading(true);
     try {
       setDescripcion(descripcionLocal);
       const reportUUID = uuid.v4() as string;
-      const fileExtension = reportData.imagenUri.split('.').pop();
+      const fileExtension = reportData.imagenUri.split(".").pop();
       const storagePath = `reportes/${profile.uid}/${reportUUID}.${fileExtension}`;
-      const imageUrl = await uploadImageAsync(reportData.imagenUri, storagePath);
+      const imageUrl = await uploadImageAsync(
+        reportData.imagenUri,
+        storagePath,
+      );
       const timestamp = serverTimestamp();
       const reporteDocument = {
         tipo: reportData.tipo,
@@ -91,35 +109,39 @@ export default function DetalleScreen() {
           longitude: reportData.ubicacion?.longitude,
         },
         descripcion: descripcionLocal,
-        imagenUrl: imageUrl, 
-        storagePath: storagePath, 
+        imagenUrl: imageUrl,
+        storagePath: storagePath,
         userId: profile.uid,
         reporteroInfo: {
           nombre: profile.displayName || "Anónimo",
-          email: profile.email || "No disponible", 
+          email: profile.email || "No disponible",
           photoURL: profile.photoURL || null,
         },
-        status: "En espera", 
-        createdAt: timestamp, 
+        status: "En espera",
+        createdAt: timestamp,
         activityLog: [
           {
             status: "Reporte Creado",
             timestamp: new Date(),
             userId: profile.uid,
-          }
-        ]
+          },
+        ],
       };
-
-      const docRef = await addDoc(collection(FIREBASE_DB, "reportes"), reporteDocument);
+      const docRef = await addDoc(
+        collection(FIREBASE_DB, "reportes"),
+        reporteDocument,
+      );
       Alert.alert("Éxito", "Tu reporte ha sido enviado correctamente.");
       limpiarReporte();
-      router.replace('/(tabs)'); 
-
+      router.replace("/(tabs)");
     } catch (error) {
       console.error("Error al enviar reporte: ", error);
-      Alert.alert("Error", "Hubo un problema al enviar tu reporte. Intenta de nuevo.");
+      Alert.alert(
+        "Error",
+        "Hubo un problema al enviar tu reporte. Intenta de nuevo.",
+      );
     } finally {
-      setIsUploading(false); 
+      setIsUploading(false);
     }
   };
 
@@ -136,8 +158,8 @@ export default function DetalleScreen() {
   return (
     <View style={styles.mainContainer}>
       <StatusBar barStyle="dark-content" backgroundColor="#f4f4f8" />
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
       >
@@ -145,13 +167,13 @@ export default function DetalleScreen() {
           <Text style={styles.cardTitle}>Resumen del Reporte</Text>
           <Text style={styles.infoText}>
             <Text style={styles.infoLabel}>Tipo: </Text>
-            {reportData.tipo || 'No seleccionado'}
+            {reportData.tipo || "No seleccionado"}
           </Text>
           <Text style={styles.infoText}>
             <Text style={styles.infoLabel}>Ubicacion: </Text>
-            {reportData.ubicacion 
+            {reportData.ubicacion
               ? `${reportData.ubicacion.latitude.toFixed(5)}, ${reportData.ubicacion.longitude.toFixed(5)}`
-              : 'No seleccionada'}
+              : "No seleccionada"}
           </Text>
         </View>
 
@@ -164,10 +186,12 @@ export default function DetalleScreen() {
               placeholderTextColor="#999"
               multiline
               maxLength={500}
-              onChangeText={setDescripcionLocal} 
+              onChangeText={setDescripcionLocal}
               value={descripcionLocal}
             />
-            <Text style={styles.charCount}>{descripcionLocal.length}/500 caracteres</Text>
+            <Text style={styles.charCount}>
+              {descripcionLocal.length}/500 caracteres
+            </Text>
           </View>
         </View>
 
@@ -178,25 +202,33 @@ export default function DetalleScreen() {
               <Ionicons name="camera-outline" size={20} color="#007AFF" />
               <Text style={styles.actionButtonText}>Tomar Foto</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={seleccionarDeGaleria}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={seleccionarDeGaleria}
+            >
               <Ionicons name="image-outline" size={20} color="#007AFF" />
               <Text style={styles.actionButtonText}>Seleccionar</Text>
             </TouchableOpacity>
           </View>
-          
+
           {imagenLocal ? (
             <Image source={{ uri: imagenLocal }} style={styles.imagePreview} />
           ) : (
             <View style={styles.imagePlaceholder}>
               <Ionicons name="image" size={50} color="#888" />
-              <Text style={styles.imagePlaceholderText}>No hay imágenes agregadas</Text>
+              <Text style={styles.imagePlaceholderText}>
+                No hay imágenes agregadas
+              </Text>
             </View>
           )}
         </View>
       </ScrollView>
 
       <View style={styles.submitButtonContainer}>
-        <TouchableOpacity style={styles.submitButton} onPress={handleEnviarReporte}>
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleEnviarReporte}
+        >
           <Text style={styles.submitButtonText}>Entregar reporte</Text>
         </TouchableOpacity>
       </View>
@@ -207,7 +239,7 @@ export default function DetalleScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#f4f4f8',
+    backgroundColor: "#f4f4f8",
     paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight : 20,
   },
   scrollView: {
@@ -216,121 +248,121 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingHorizontal: 15,
     paddingTop: 10,
-    paddingBottom: 20, 
+    paddingBottom: 20,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
-    elevation: 3, 
+    elevation: 3,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    color: '#000',
+    color: "#000",
   },
   infoText: {
     fontSize: 15,
-    color: '#333',
+    color: "#333",
     marginBottom: 5,
   },
   infoLabel: {
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
   },
   textInputContainer: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     borderRadius: 8,
     padding: 10,
     minHeight: 120,
   },
   textInput: {
     height: 100,
-    padding: 0, 
-    textAlignVertical: 'top',
-    color: '#000',
+    padding: 0,
+    textAlignVertical: "top",
+    color: "#000",
     fontSize: 15,
   },
   charCount: {
-    textAlign: 'right',
-    color: 'gray',
+    textAlign: "right",
+    color: "gray",
     fontSize: 12,
     marginTop: 5,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 15,
   },
   actionButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#e6f2ff',
-    borderColor: '#007AFF',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#e6f2ff",
+    borderColor: "#007AFF",
     borderWidth: 1,
     borderRadius: 8,
     paddingVertical: 12,
-    marginHorizontal: 5, 
+    marginHorizontal: 5,
   },
   actionButtonText: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   imagePreview: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 8,
     marginTop: 10,
   },
   imagePlaceholder: {
     height: 150,
-    backgroundColor: '#e9e9e9',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#e9e9e9",
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 8,
     marginTop: 10,
   },
   imagePlaceholderText: {
-    color: '#888', 
+    color: "#888",
     marginTop: 8,
     fontSize: 15,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f4f4f8',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f4f4f8",
     paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight : 20,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
 
   submitButtonContainer: {
     padding: 15,
-    backgroundColor: '#f4f4f8', 
+    backgroundColor: "#f4f4f8",
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     paddingVertical: 16,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     elevation: 2,
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
