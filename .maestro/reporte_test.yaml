@@ -1,0 +1,55 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- tapOn: "Reportar una deficiencia"
+
+- extendedWaitUntil:
+    visible: "Selecciona el tipo de deficiencia que encontraste"
+    timeout: 5000
+
+- tapOn: "Bache"
+- tapOn: "Continuar"
+
+- extendedWaitUntil:
+    visible: "Siguiente"
+    timeout: 8000
+
+- tapOn:
+    point: 50%, 50%
+
+- tapOn: "Siguiente"
+
+- extendedWaitUntil:
+    visible: "Evidencia Fotográfica"
+    timeout: 5000
+
+- tapOn: "Ejemplo: La deficiencia esta a mitad de la avenida"
+- inputText: "Hay un bache enorme en la calle principal que daña los autos."
+- hideKeyboard
+
+- tapOn: "Seleccionar"
+
+- runFlow:
+    when:
+      visible: "Photos"
+    commands:
+      - tapOn:
+          index:
+
+- tapOn:
+    point: 16%, 20%
+    optional: true
+
+- assertNotVisible: "No hay imágenes agregadas"
+
+- tapOn: "Entregar reporte"
+
+- extendedWaitUntil:
+    visible: "Éxito"
+    timeout: 15000
+
+- tapOn: "OK"
+
+- assertVisible: "Panel de Reportes"
