@@ -1,0 +1,28 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- tapOn: "Informes"
+
+- extendedWaitUntil:
+    visible: "Informes y Estadísticas"
+    timeout: 10000
+
+- assertVisible: "Productividad Total"
+- assertVisible: "Total Asignados"
+- assertVisible: "Métricas de Trabajo"
+
+- scrollUntilVisible:
+    element: "Generación de informes"
+    direction: DOWN
+
+- tapOn: "10"
+- tapOn: "20"
+
+- assertVisible: "GENERAR INFORME PDF"
+- tapOn: "GENERAR INFORME PDF"
+
+- delay: 3000
+
+- assertVisible: "Informes y Estadísticas"
