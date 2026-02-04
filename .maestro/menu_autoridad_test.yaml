@@ -1,0 +1,34 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible: "En Espera"
+    timeout: 10000
+
+- assertVisible: "Tipo:"
+
+- tapOn: "En Progreso"
+- scroll
+- assertVisible: "En Progreso"
+
+- tapOn: "Entregados"
+
+- runFlow:
+    when:
+      visible: "No hay reportes"
+    commands:
+      - assertVisible: "No hay reportes"
+
+- tapOn: "En Espera"
+
+- extendedWaitUntil:
+    visible: "Tipo:"
+    timeout: 5000
+
+- tapOn:
+    text: "De:"
+    index: 0
+
+- assertNotVisible: "En Espera"
