@@ -1,0 +1,57 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible: "Guardar Cambios"
+    timeout: 5000
+- assertVisible: "@"
+
+- tapOn:
+    index: 0
+    type: "text_input"
+- eraseText
+- inputText: "autoridad"
+- hideKeyboard
+
+- tapOn:
+    index: 1
+    type: "text_input"
+- eraseText
+- inputText: "bache"
+- hideKeyboard
+
+- tapOn: "Guardar Cambios"
+
+- extendedWaitUntil:
+    visible: "Éxito"
+    timeout: 3000
+- tapOn: "OK"
+
+- assertVisible: "USUARIO"
+
+- tapOn:
+    index: 0
+    point: "50%, 20%"
+
+- extendedWaitUntil:
+    visible: "Guardar Cambios"
+    timeout: 5000
+
+- tapOn:
+    index: 0
+    type: "text_input"
+- eraseText
+- inputText: "usuario"
+- hideKeyboard
+
+- tapOn:
+    index: 1
+    type: "text_input"
+- eraseText
+- inputText: "esto_debe_borrarse"
+- hideKeyboard
+
+- tapOn: "Guardar Cambios"
+- tapOn: "OK"
