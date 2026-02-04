@@ -1,0 +1,40 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- tapOn:
+    text: "Tipo:"
+    index: 0
+
+- extendedWaitUntil:
+    visible: "Resumen del Reporte"
+    timeout: 10000
+
+- assertVisible: "Ubicación"
+- assertVisible: "Acciones"
+
+- tapOn: "Rechazar"
+
+- assertVisible: "Razón del Rechazo"
+- assertVisible: "Confirmar"
+
+- tapOn: "Otra razón (ej. duplicado, fuera de área...)"
+- inputText: "No"
+- hideKeyboard
+- tapOn: "Confirmar"
+
+- assertVisible: "Error"
+- tapOn: "OK"
+
+- tapOn: "Foto incorrecta"
+
+- tapOn: "Confirmar"
+
+- extendedWaitUntil:
+    visible: "Éxito"
+    timeout: 5000
+- tapOn: "OK"
+
+- assertNotVisible: "Resumen del Reporte"
+- assertVisible: "En Espera"
