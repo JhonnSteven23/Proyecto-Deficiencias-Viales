@@ -1,0 +1,26 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible: "USUARIO"
+    timeout: 5000
+
+- assertVisible: "USUARIO"
+- assertVisible: "@"
+
+- swipe:
+    direction: UP
+    duration: 500
+
+- swipe:
+    direction: DOWN
+    duration: 500
+
+- tapOn:
+    index: 0
+    point: "50%, 20%"
+
+- userInteraction:
+    reason: "Verificando que la navegación ocurrió correctamente"
