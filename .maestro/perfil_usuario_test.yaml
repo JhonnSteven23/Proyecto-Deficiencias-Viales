@@ -1,0 +1,32 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- tapOn: "Perfil"
+
+- extendedWaitUntil:
+    visible: "Reportes Enviados"
+    timeout: 5000
+
+- assertVisible: "Solucionados"
+- assertVisible: "Configuración"
+
+- tapOn: "Acerca de"
+
+- assertVisible: "Acerca de la App"
+- assertVisible: "Versión"
+
+- tapOn: "Entendido"
+
+- tapOn: "Contactar Soporte"
+- assertVisible: "Soporte Técnico"
+- tapOn: "Cerrar"
+
+- tapOn: "Cerrar Sesión"
+
+- extendedWaitUntil:
+    visible: "Iniciar Sesión"
+    timeout: 10000
+
+- assertNotVisible: "Perfil"
