@@ -1,0 +1,37 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- tapOn: "Mapa"
+
+- runFlow:
+    when:
+      visible: "Permitir"
+    commands:
+      - tapOn: "Permitir"
+      - tapOn: "Precisa"
+
+- extendedWaitUntil:
+    visible: "Mostrar Resueltos"
+    timeout: 10000
+
+- assertVisible: "Mostrar Resueltos"
+
+- tapOn: "Mostrar Resueltos"
+
+- assertVisible: "Ocultar Resueltos"
+
+- tapOn: "Ocultar Resueltos"
+- assertVisible: "Mostrar Resueltos"
+
+- tapOn:
+    point: "50%, 50%"
+
+- runFlow:
+    when:
+      visible: "Ubicación del Reporte"
+    commands:
+      - back
+
+- assertVisible: "Mostrar Resueltos"
