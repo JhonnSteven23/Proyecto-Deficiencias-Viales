@@ -1,0 +1,32 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- tapOn: "Perfil"
+
+- assertVisible: "Reportes Asignados"
+- assertVisible: "Reportes Completados"
+- assertVisible: "Configuracion"
+
+- tapOn: "Contactar Soporte"
+- assertVisible: "Soporte Técnico"
+- assertVisible: "Cerrar"
+- tapOn: "Cerrar"
+
+- tapOn: "Acerca de"
+- assertVisible: "Acerca de la App"
+- assertVisible: "Entendido"
+- tapOn: "Entendido"
+
+- scrollUntilVisible:
+    element: "Cerrar Sesion"
+    direction: DOWN
+
+- tapOn: "Cerrar Sesion"
+
+- extendedWaitUntil:
+    visible: "Iniciar Sesión"
+    timeout: 5000
+
+- assertVisible: "Correo electrónico"
