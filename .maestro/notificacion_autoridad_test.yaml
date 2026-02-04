@@ -1,0 +1,30 @@
+appId: com.jhon_steven_23.DeficienciasVialesJhonn
+---
+- launchApp:
+    clearState: false
+
+- tapOn: "Avisos"
+
+- extendedWaitUntil:
+    visible: "No tienes avisos."
+    timeout: 3000
+
+- runFlow:
+    when:
+      notVisible: "No tienes avisos."
+    commands:
+      - assertVisible: "/"
+
+      - tapOn:
+          index: 0
+          point: "50%, 20%"
+
+      - extendedWaitUntil:
+          visible: "Resumen del Reporte"
+          timeout: 5000
+
+      - assertVisible: "Ubicación"
+
+      - back
+
+      - assertVisible: "Avisos"
