@@ -20,7 +20,7 @@ appId: com.jhon_steven_23.DeficienciasVialesJhonn
 
 - tapOn:
     index: 0
-    point: "50%, 20%"
 
-- userInteraction:
-    reason: "Verificando que la navegación ocurrió correctamente"
+- extendedWaitUntil:
+    visible: "Informes"
+    timeout: 5000
