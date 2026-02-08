@@ -11,21 +11,18 @@ appId: com.jhon_steven_23.DeficienciasVialesJhonn
 
 - runFlow:
     when:
-      visible: "No tienes avisos."
+      notVisible: "No tienes avisos."
     commands:
-      - stop
+      - tapOn:
+          index: 0
 
-- tapOn:
-    index: 0
-    point: 50%, 20%
+      - extendedWaitUntil:
+          visible: "Detalle del Reporte"
+          timeout: 10000
 
-- extendedWaitUntil:
-    visible: "Detalle del Reporte"
-    timeout: 10000
+      - assertVisible: "Resumen del Reporte"
+      - assertVisible: "Ubicación"
 
-- assertVisible: "Resumen del Reporte"
-- assertVisible: "Ubicación"
+      - back
 
-- back
-
-- assertVisible: "Historial de Avisos"
+      - assertVisible: "Historial de Avisos"
