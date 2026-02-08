@@ -23,6 +23,6 @@ appId: com.jhon_steven_23.DeficienciasVialesJhonn
 - assertVisible: "GENERAR INFORME PDF"
 - tapOn: "GENERAR INFORME PDF"
 
-- delay: 3000
-
-- assertVisible: "Informes y Estadísticas"
+- extendedWaitUntil:
+    visible: "Informes y Estadísticas"
+    timeout: 15000
