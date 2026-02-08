@@ -11,14 +11,12 @@ appId: com.jhon_steven_23.DeficienciasVialesJhonn
 
 - tapOn:
     index: 1
-    type: "text_input"
 - eraseText
 - inputText: "+591 71234567"
 - hideKeyboard
 
 - tapOn:
     index: 2
-    type: "text_input"
 - eraseText
 - inputText: "2.0.0"
 - hideKeyboard
@@ -32,22 +30,25 @@ appId: com.jhon_steven_23.DeficienciasVialesJhonn
 
 - tapOn:
     index: 0
-    type: "text_input"
 - eraseText
 - hideKeyboard
+
 - tapOn: "Guardar Cambios"
-- assertVisible: "Error"
+
+- extendedWaitUntil:
+    visible: "Error"
+    timeout: 5000
 - tapOn: "OK"
 
 - tapOn:
     index: 0
-    type: "text_input"
 - inputText: "admin@soporte.com"
 - hideKeyboard
 
 - scrollUntilVisible:
     element: "Cerrar Sesión"
     direction: DOWN
+
 - tapOn: "Cerrar Sesión"
 
 - extendedWaitUntil:
