@@ -5,14 +5,57 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
-import {ActivityIndicator,Alert,Dimensions,ScrollView,StyleSheet,Text,TouchableOpacity,View,} from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { BarChart } from "react-native-chart-kit";
 
 LocaleConfig.locales["es"] = {
-  monthNames: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",],
-  monthNamesShort: ["Ene.","Feb.","Mar.","Abr.","May.","Jun.","Jul.","Ago.","Sep.","Oct.","Nov.","Dic.",],
-  dayNames: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado",],
+  monthNames: [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ],
+  monthNamesShort: [
+    "Ene.",
+    "Feb.",
+    "Mar.",
+    "Abr.",
+    "May.",
+    "Jun.",
+    "Jul.",
+    "Ago.",
+    "Sep.",
+    "Oct.",
+    "Nov.",
+    "Dic.",
+  ],
+  dayNames: [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ],
   dayNamesShort: ["Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb."],
   today: "Hoy",
 };
@@ -20,7 +63,7 @@ LocaleConfig.defaultLocale = "es";
 
 const screenWidth = Dimensions.get("window").width;
 
-interface Reporte {
+export interface Reporte {
   id: string;
   tipo: string;
   descripcion: string;
@@ -29,6 +72,11 @@ interface Reporte {
   createdAt: any;
   completedAt?: any;
   ubicacion: { latitude: number; longitude: number };
+  reporteroInfo?: { nombre: string; email: string; photoURL?: string };
+  activityLog?: { status: string; timestamp: any; userId: string }[];
+  razonRechazo?: string;
+  imagenSolucionUrl?: string;
+  feedback?: { rating: number; comentario: string; createdAt: any };
 }
 
 interface Stats {
@@ -51,7 +99,15 @@ function formatDuration(ms: number): string {
   return `${minutos.toFixed(0)} min`;
 }
 
-const BigStatCard = ({title,value,color = "#007AFF",}: {title: string;value: number;color?: string;}) => (
+const BigStatCard = ({
+  title,
+  value,
+  color = "#007AFF",
+}: {
+  title: string;
+  value: number;
+  color?: string;
+}) => (
   <View style={[styles.bigCard, { borderColor: color }]}>
     <Text style={[styles.bigCardValue, { color }]}>{value}</Text>
     <Text style={[styles.bigCardTitle, { color }]}>{title}</Text>
@@ -87,46 +143,150 @@ const generateHTML = (
       ? `Del ${dateRange.start} al ${dateRange.end}`
       : "Histórico Completo";
 
-  let reportesHtml = `<h3>Listado de Reportes (${rangoTexto})</h3><table>`;
-  reportesHtml += `
-    <tr>
-      <th>Estado</th>
-      <th>Fecha Creación</th>
-      <th>Fecha Completado</th>
-      <th>Descripción</th>
-    </tr>
-  `;
+  let reportesHtml = `<h3>Listado Detallado de Reportes (${rangoTexto})</h3>`;
 
-  for (const reporte of reportes) {
-    reportesHtml += `
-      <tr>
-        <td>${reporte.status}</td>
-        <td>${reporte.createdAt?.toDate().toLocaleDateString() || "-"}</td>
-        <td>${reporte.completedAt?.toDate().toLocaleDateString() || "-"}</td>
-        <td class="text-wrap">${reporte.descripcion.substring(0, 60)}...</td>
-      </tr>
-    `;
+  if (reportes.length === 0) {
+    reportesHtml += `<p>No hay reportes en este periodo.</p>`;
+  } else {
+    for (const reporte of reportes) {
+      const activityLogHtml = reporte.activityLog
+        ? `<div class="seccion">
+             <strong>Historial de Actividad:</strong>
+             <ul>
+               ${reporte.activityLog
+                 .sort((a, b) => a.timestamp?.seconds - b.timestamp?.seconds)
+                 .map(
+                   (log) =>
+                     `<li>${log.status} - ${
+                       log.timestamp?.toDate().toLocaleDateString() || ""
+                     } ${log.timestamp?.toDate().toLocaleTimeString() || ""}</li>`,
+                 )
+                 .join("")}
+             </ul>
+           </div>`
+        : "";
+
+      let resolucionHtml = "";
+      if (reporte.status === "Rechazado" && reporte.razonRechazo) {
+        resolucionHtml = `<div class="seccion rechazo"><strong>Razón del Rechazo:</strong> ${reporte.razonRechazo}</div>`;
+      } else if (reporte.status === "Completado") {
+        resolucionHtml = `<div class="seccion solucion">
+            <strong>Evidencia de Solución:</strong><br/>
+            ${
+              reporte.imagenSolucionUrl
+                ? `<img src="${reporte.imagenSolucionUrl}" class="img-evidencia" />`
+                : "Trabajo marcado como completado sin imagen."
+            }
+          </div>`;
+      }
+
+      let feedbackHtml = "";
+      if (reporte.feedback) {
+        feedbackHtml = `<div class="seccion feedback">
+            <strong>Calificación del Ciudadano:</strong> ${reporte.feedback.rating} / 5 Estrellas<br/>
+            ${
+              reporte.feedback.comentario
+                ? `<strong>Comentario:</strong> "${reporte.feedback.comentario}"`
+                : ""
+            }
+          </div>`;
+      }
+
+      reportesHtml += `
+        <div class="reporte-card">
+          <div class="header-card">
+            <h4>Reporte ID: ${reporte.id}</h4>
+            <span class="badge ${reporte.status.replace(/\s+/g, "-")}">${reporte.status}</span>
+          </div>
+          
+          <table>
+            <tr>
+              <td><strong>Tipo:</strong> ${reporte.tipo}</td>
+              <td><strong>Fecha:</strong> ${reporte.createdAt?.toDate().toLocaleDateString() || "-"}</td>
+            </tr>
+            <tr>
+              <td colspan="2"><strong>Ubicación:</strong> Lat: ${reporte.ubicacion?.latitude}, Lng: ${reporte.ubicacion?.longitude}</td>
+            </tr>
+            ${
+              reporte.reporteroInfo
+                ? `<tr>
+                    <td colspan="2"><strong>Reportero:</strong> ${reporte.reporteroInfo.nombre} (${reporte.reporteroInfo.email})</td>
+                   </tr>`
+                : ""
+            }
+          </table>
+
+          <div class="seccion">
+            <strong>Descripción:</strong>
+            <p>${reporte.descripcion}</p>
+          </div>
+
+          <div class="seccion">
+            <strong>Imagen Adjunta:</strong><br/>
+            <img src="${reporte.imagenUrl}" class="img-evidencia" />
+          </div>
+
+          ${resolucionHtml}
+          ${feedbackHtml}
+          ${activityLogHtml}
+        </div>
+      `;
+    }
   }
-  reportesHtml += "</table>";
 
   return `
     <html>
       <head>
+        <meta charset="utf-8">
         <style>
-          body { font-family: Helvetica, sans-serif; padding: 20px; }
+          body { font-family: Helvetica, sans-serif; padding: 20px; color: #333; }
           h1 { color: #007AFF; text-align: center; }
-          h3 { border-bottom: 2px solid #eee; margin-top: 20px; color: #333; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; color: #333; }
-          .stats-grid { display: flex; justify-content: space-between; margin-bottom: 20px; }
-          .stat-box { border: 1px solid #ddd; padding: 10px; width: 48%; text-align: center; border-radius: 8px; }
-          .big-num { font-size: 24px; font-weight: bold; color: #007AFF; display: block; }
+          h3 { border-bottom: 2px solid #eee; margin-top: 30px; padding-bottom: 10px; }
+          
+          /* Métricas */
+          .stats-grid { display: flex; justify-content: space-between; margin-bottom: 30px; }
+          .stat-box { border: 1px solid #ddd; padding: 15px; width: 48%; text-align: center; border-radius: 8px; background: #fafafa; }
+          .big-num { font-size: 28px; font-weight: bold; color: #007AFF; display: block; margin-bottom: 5px; }
+          
+          /* Tarjetas de Reportes */
+          .reporte-card { 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            page-break-inside: avoid; /* Evita que el reporte se corte a la mitad de la hoja al imprimir */
+            background: #fff;
+          }
+          .header-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+          .header-card h4 { margin: 0; color: #444; }
+          
+          /* Badges de estado */
+          .badge { padding: 5px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; }
+          .badge.En-espera { background-color: #D9534F; }
+          .badge.En-progreso { background-color: #F0AD4E; }
+          .badge.Completado { background-color: #5CB85C; }
+          .badge.Rechazado { background-color: #777; }
+
+          /* Tablas internas */
+          table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 13px; }
+          td { padding: 4px 0; }
+
+          /* Secciones dentro del reporte */
+          .seccion { margin-top: 10px; font-size: 13px; }
+          .seccion p { margin: 5px 0 0 0; }
+          .rechazo { background-color: #fff0f0; padding: 10px; border-left: 4px solid #D9534F; }
+          .solucion { background-color: #f0fff0; padding: 10px; border-left: 4px solid #5CB85C; }
+          .feedback { background-color: #f9f9fa; padding: 10px; border-left: 4px solid #007AFF; font-style: italic; }
+          
+          .img-evidencia { max-width: 300px; max-height: 200px; border-radius: 5px; margin-top: 5px; object-fit: cover; }
+          
+          ul { margin: 5px 0 0 0; padding-left: 20px; font-size: 12px; color: #555; }
+          li { margin-bottom: 3px; }
         </style>
       </head>
       <body>
         <h1>Informe de Gestión: ${especialidad}</h1>
-        <p style="text-align:center">Gestor: ${profile.displayName} | Generado: ${fechaHoy}</p>
+        <p style="text-align:center; font-size: 14px;"><strong>Gestor:</strong> ${profile.displayName} | <strong>Generado:</strong> ${fechaHoy}</p>
         
         <h3>Métricas Globales</h3>
         <div class="stats-grid">
@@ -229,7 +389,20 @@ export default function InformeScreen() {
   }, [profile]);
 
   const chartData = useMemo(() => {
-    const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic",];
+    const months = [
+      "Ene",
+      "Feb",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dic",
+    ];
     const data = new Array(12).fill(0);
 
     reportes.forEach((r) => {
