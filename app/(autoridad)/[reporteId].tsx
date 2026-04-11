@@ -1,26 +1,9 @@
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import {
-  arrayUnion,
-  doc,
-  getDoc,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
+import {arrayUnion,doc,getDoc,serverTimestamp,updateDoc,} from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  Image,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import {ActivityIndicator,Alert,Button,Image,Modal,ScrollView,StyleSheet,Text,TextInput,View,} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { Rating } from "react-native-ratings";
 import uuid from "react-native-uuid";

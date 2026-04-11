@@ -1,22 +1,23 @@
-import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Button, StyleSheet, View } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
-import { useReport } from '../../context/ReportContext';
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {ActivityIndicator, Alert, Button,StyleSheet,View,} from "react-native";
+import MapView, { Marker, Region } from "react-native-maps";
+import { useReport } from "../../context/ReportContext";
 
 export default function MapaScreen() {
   const router = useRouter();
-  const { setUbicacion } = useReport(); 
+  const { setUbicacion } = useReport();
   const [mapRegion, setMapRegion] = useState<Region | undefined>(undefined);
-  const [markerCoord, setMarkerCoord] = useState<Location.LocationObjectCoords | null>(null);
+  const [markerCoord, setMarkerCoord] =
+    useState<Location.LocationObjectCoords | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Error', 'Se necesita permiso de ubicación para reportar.');
+      if (status !== "granted") {
+        Alert.alert("Error", "Se necesita permiso de ubicación para reportar.");
         setIsLoading(false);
         return;
       }
@@ -31,7 +32,7 @@ export default function MapaScreen() {
         });
         setMarkerCoord(coords);
       } catch (e) {
-        Alert.alert('Error', 'No se pudo obtener la ubicación.');
+        Alert.alert("Error", "No se pudo obtener la ubicación.");
       } finally {
         setIsLoading(false);
       }
@@ -43,10 +44,10 @@ export default function MapaScreen() {
   };
   const handleContinue = () => {
     if (markerCoord) {
-      setUbicacion(markerCoord); 
-      router.push('/(reporte)/reporte3'); 
+      setUbicacion(markerCoord);
+      router.push("/(reporte)/reporte3");
     } else {
-      Alert.alert('Error', 'Por favor, marca una ubicación en el mapa.');
+      Alert.alert("Error", "Por favor, marca una ubicación en el mapa.");
     }
   };
   if (isLoading) {
@@ -54,9 +55,18 @@ export default function MapaScreen() {
   }
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} region={mapRegion} onPress={handleMapPress} showsUserLocation>
+      <MapView
+        style={styles.map}
+        region={mapRegion}
+        onPress={handleMapPress}
+        showsUserLocation
+      >
         {markerCoord && (
-          <Marker coordinate={markerCoord} draggable onDragEnd={(e) => setMarkerCoord(e.nativeEvent.coordinate)}/>
+          <Marker
+            coordinate={markerCoord}
+            draggable
+            onDragEnd={(e) => setMarkerCoord(e.nativeEvent.coordinate)}
+          />
         )}
       </MapView>
       <View style={styles.buttonContainer}>
@@ -70,7 +80,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
   buttonContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     left: 20,
     right: 20,

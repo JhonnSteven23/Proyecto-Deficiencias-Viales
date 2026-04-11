@@ -1,25 +1,33 @@
-import { useAuth } from '@/context/AuthContext';
-import { FIREBASE_DB } from '@/services/firebase';
-import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
+import { useAuth } from "@/context/AuthContext";
+import { FIREBASE_DB } from "@/services/firebase";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import MapView, { Marker, Region } from "react-native-maps";
 
-const IconoBacheRojo = require('../../assets/images/Bache_Rojo.png');
-const IconoAlcantarillaRojo = require('../../assets/images/Alcantarilla_Rojo.png');
-const IconoPosteRojo = require('../../assets/images/Poste_Rojo.png');
+const IconoBacheRojo = require("../../assets/images/Bache_Rojo.png");
+const IconoAlcantarillaRojo = require("../../assets/images/Alcantarilla_Rojo.png");
+const IconoPosteRojo = require("../../assets/images/Poste_Rojo.png");
 
-const IconoBacheAmarillo = require('../../assets/images/Bache_Amarillo.png');
-const IconoAlcantarillaAmarillo = require('../../assets/images/Alcantarilla_Amarillo.png');
-const IconoPosteAmarillo = require('../../assets/images/Poste_Amarillo.png');
+const IconoBacheAmarillo = require("../../assets/images/Bache_Amarillo.png");
+const IconoAlcantarillaAmarillo = require("../../assets/images/Alcantarilla_Amarillo.png");
+const IconoPosteAmarillo = require("../../assets/images/Poste_Amarillo.png");
 
-const IconoBacheVerde = require('../../assets/images/Bache_Verde.png'); 
-const IconoAlcantarillaVerde = require('../../assets/images/Alcantarilla_Verde.png');
-const IconoPosteVerde = require('../../assets/images/Poste_Verde.png');
+const IconoBacheVerde = require("../../assets/images/Bache_Verde.png");
+const IconoAlcantarillaVerde = require("../../assets/images/Alcantarilla_Verde.png");
+const IconoPosteVerde = require("../../assets/images/Poste_Verde.png");
 
-const IconoDefault = require('../../assets/images/icon.png');
+const IconoDefault = require("../../assets/images/icon.png");
 
 interface Reporte {
   id: string;
@@ -27,7 +35,7 @@ interface Reporte {
   descripcion: string;
   imagenUrl: string;
   status: string;
-  createdAt: any; 
+  createdAt: any;
   ubicacion: {
     latitude: number;
     longitude: number;
@@ -47,41 +55,51 @@ export default function MapaAutoridadScreen() {
 
   const getReportIcon = (tipo: string, status: string) => {
     const tipoNorm = tipo.toLowerCase();
-    const statusNorm = status.toLowerCase(); 
+    const statusNorm = status.toLowerCase();
 
-    if (statusNorm === 'en espera') {
+    if (statusNorm === "en espera") {
       switch (tipoNorm) {
-        case 'bache': return IconoBacheRojo;
-        case 'alcantarilla': return IconoAlcantarillaRojo;
-        case 'poste': return IconoPosteRojo;
-        default: return IconoDefault;
+        case "bache":
+          return IconoBacheRojo;
+        case "alcantarilla":
+          return IconoAlcantarillaRojo;
+        case "poste":
+          return IconoPosteRojo;
+        default:
+          return IconoDefault;
       }
-    } 
-    else if (statusNorm === 'en progreso') {
+    } else if (statusNorm === "en progreso") {
       switch (tipoNorm) {
-        case 'bache': return IconoBacheAmarillo;
-        case 'alcantarilla': return IconoAlcantarillaAmarillo;
-        case 'poste': return IconoPosteAmarillo;
-        default: return IconoDefault;
+        case "bache":
+          return IconoBacheAmarillo;
+        case "alcantarilla":
+          return IconoAlcantarillaAmarillo;
+        case "poste":
+          return IconoPosteAmarillo;
+        default:
+          return IconoDefault;
+      }
+    } else if (statusNorm === "completado") {
+      switch (tipoNorm) {
+        case "bache":
+          return IconoBacheVerde;
+        case "alcantarilla":
+          return IconoAlcantarillaVerde;
+        case "poste":
+          return IconoPosteVerde;
+        default:
+          return IconoDefault;
       }
     }
-    else if (statusNorm === 'completado') {
-      switch (tipoNorm) {
-        case 'bache': return IconoBacheVerde;
-        case 'alcantarilla': return IconoAlcantarillaVerde;
-        case 'poste': return IconoPosteVerde;
-        default: return IconoDefault;
-      }
-    }
-    
+
     return IconoDefault;
   };
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permiso denegado', 'No podemos mostrar tu ubicación.');
+      if (status !== "granted") {
+        Alert.alert("Permiso denegado", "No podemos mostrar tu ubicación.");
         setIsLoadingLocation(false);
         return;
       }
@@ -94,41 +112,65 @@ export default function MapaAutoridadScreen() {
       };
       setCurrentLocation(region);
       setIsLoadingLocation(false);
-      mapRef.current?.animateToRegion(region, 1000);
     })();
   }, []);
 
   useEffect(() => {
-    if (!profile || profile.role !== 'autoridad' || !profile.especialidad) {
+    if (!profile || profile.role !== "autoridad" || !profile.especialidad) {
       setIsLoadingReports(false);
       return;
     }
 
-    const estadosAFiltrar = showResolved 
-      ? ["En espera", "En progreso", "Completado"] 
-      : ["En espera", "En progreso"]; 
+    const estadosAFiltrar = showResolved
+      ? ["En espera", "En progreso", "Completado"]
+      : ["En espera", "En progreso"];
 
     const reportesRef = collection(FIREBASE_DB, "reportes");
     const q = query(
       reportesRef,
-      where("tipo", "==", profile.especialidad), 
-      where("status", "in", estadosAFiltrar) 
+      where("tipo", "==", profile.especialidad),
+      where("status", "in", estadosAFiltrar),
     );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const fetchedReportes: Reporte[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedReportes.push({ id: doc.id, ...doc.data() } as Reporte);
-      });
-      setReportes(fetchedReportes);
-      setIsLoadingReports(false);
-    }, (error) => {
-      console.error("Error reportes mapa: ", error);
-      setIsLoadingReports(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const fetchedReportes: Reporte[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedReportes.push({ id: doc.id, ...doc.data() } as Reporte);
+        });
+        setReportes(fetchedReportes);
+        setIsLoadingReports(false);
+      },
+      (error) => {
+        console.error("Error reportes mapa: ", error);
+        setIsLoadingReports(false);
+      },
+    );
 
-    return () => unsubscribe(); 
-  }, [profile, showResolved]); 
+    return () => unsubscribe();
+  }, [profile, showResolved]);
+
+  useEffect(() => {
+    if (reportes.length > 0 && mapRef.current) {
+      const coordenadas = reportes.map((reporte) => reporte.ubicacion);
+      if (currentLocation) {
+        coordenadas.push({
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+        });
+      }
+
+      setTimeout(() => {
+        mapRef.current?.fitToCoordinates(coordenadas, {
+          edgePadding: { top: 120, right: 80, bottom: 80, left: 80 },
+          animated: true,
+        });
+      }, 500);
+    } else if (reportes.length === 0 && mapRef.current && currentLocation) {
+      mapRef.current.animateToRegion(currentLocation, 1000);
+    }
+  }, [reportes, currentLocation]);
 
   if (isLoadingLocation) {
     return (
@@ -141,16 +183,18 @@ export default function MapaAutoridadScreen() {
   return (
     <View style={styles.container}>
       <MapView
-        ref={mapRef} 
+        ref={mapRef}
         style={styles.map}
-        initialRegion={currentLocation || { 
-          latitude: -17.7833, 
-          longitude: -63.1822,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation={true} 
-        showsMyLocationButton={true} 
+        initialRegion={
+          currentLocation || {
+            latitude: -17.7833,
+            longitude: -63.1822,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }
+        }
+        showsUserLocation={true}
+        showsMyLocationButton={true}
       >
         {reportes.map((reporte) => (
           <Marker
@@ -158,7 +202,7 @@ export default function MapaAutoridadScreen() {
             coordinate={reporte.ubicacion}
             onPress={() => router.push(`/(autoridad)/${reporte.id}`)}
           >
-            <Image 
+            <Image
               source={getReportIcon(reporte.tipo, reporte.status)}
               style={styles.markerImage}
             />
@@ -167,17 +211,21 @@ export default function MapaAutoridadScreen() {
       </MapView>
 
       <View style={styles.filterButtonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
-            styles.filterButton, 
-            showResolved ? styles.filterButtonActive : styles.filterButtonInactive
+            styles.filterButton,
+            showResolved
+              ? styles.filterButtonActive
+              : styles.filterButtonInactive,
           ]}
           onPress={() => setShowResolved(!showResolved)}
         >
-          <Text style={[
-            styles.filterButtonText, 
-            showResolved ? styles.textActive : styles.textInactive
-          ]}>
+          <Text
+            style={[
+              styles.filterButtonText,
+              showResolved ? styles.textActive : styles.textInactive,
+            ]}
+          >
             {showResolved ? "Ocultar Resueltos" : "Mostrar Resueltos"}
           </Text>
         </TouchableOpacity>
@@ -186,7 +234,8 @@ export default function MapaAutoridadScreen() {
       {reportes.length === 0 && !isLoadingReports && (
         <View style={styles.overlay}>
           <Text style={styles.overlayText}>
-            No hay reportes {showResolved ? "en ninguna categoría" : "pendientes"}.
+            No hay reportes{" "}
+            {showResolved ? "en ninguna categoría" : "pendientes"}.
           </Text>
         </View>
       )}
@@ -196,18 +245,18 @@ export default function MapaAutoridadScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  map: { width: '100%', height: '100%' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  
+  map: { width: "100%", height: "100%" },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+
   markerImage: {
     width: 45,
     height: 45,
-    resizeMode: 'contain', 
+    resizeMode: "contain",
   },
 
   filterButtonContainer: {
-    position: 'absolute',
-    top: 50, 
+    position: "absolute",
+    top: 50,
     right: 20,
     zIndex: 10,
   },
@@ -216,34 +265,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 25,
     borderWidth: 1,
-    elevation: 5, 
+    elevation: 5,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
   filterButtonInactive: {
-    backgroundColor: 'white',
-    borderColor: '#ccc',
+    backgroundColor: "white",
+    borderColor: "#ccc",
   },
   filterButtonActive: {
-    backgroundColor: '#28a745', 
-    borderColor: '#28a745',
+    backgroundColor: "#28a745",
+    borderColor: "#28a745",
   },
   filterButtonText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 14,
   },
   textInactive: {
-    color: '#333',
+    color: "#333",
   },
   textActive: {
-    color: 'white',
+    color: "white",
   },
 
   overlay: {
-    position: 'absolute', bottom: 30, left: 20, right: 20,
-    backgroundColor: 'rgba(0,0,0,0.7)', borderRadius: 10, padding: 12,
-    alignItems: 'center',
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    borderRadius: 10,
+    padding: 12,
+    alignItems: "center",
   },
-  overlayText: { color: 'white', fontSize: 14 },
+  overlayText: { color: "white", fontSize: 14 },
 });

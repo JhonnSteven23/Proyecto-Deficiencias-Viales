@@ -3,7 +3,7 @@ import { FIREBASE_DB } from '@/services/firebase';
 import { useRouter } from 'expo-router';
 import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'; // <--- Importar Image
+import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'; 
 
 export interface Notificacion {
   id: string;

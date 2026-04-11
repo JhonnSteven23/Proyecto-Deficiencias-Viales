@@ -1,10 +1,31 @@
-import { useAuth } from '@/context/AuthContext';
-import { FIREBASE_DB } from '@/services/firebase';
-import { useRouter } from 'expo-router';
-import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
-import { SceneMap, TabView } from 'react-native-tab-view';
+import { useAuth } from "@/context/AuthContext";
+import { FIREBASE_DB } from "@/services/firebase";
+import { useRouter } from "expo-router";
+import {
+  collection,
+  getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  startAfter,
+  where,
+} from "firebase/firestore";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SceneMap, TabView } from "react-native-tab-view";
+
 interface Reporte {
   id: string;
   tipo: string;
@@ -15,14 +36,26 @@ interface Reporte {
   createdAt: any;
 }
 
-const ReportListScene = ({ status }: { status: "En espera" | "En progreso" | "Completado" | "Rechazado" }) => {
+const REPORTES_POR_PAGINA = 10;
+
+const ReportListScene = ({
+  status,
+}: {
+  status: "En espera" | "En progreso" | "Completado" | "Rechazado";
+}) => {
   const { profile } = useAuth();
-  const [reportes, setReportes] = useState<Reporte[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  const [reportes, setReportes] = useState<Reporte[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const lastDocRef = useRef<any>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
-    if (!profile || profile.role !== 'autoridad' || !profile.especialidad) {
+    if (!profile || profile.role !== "autoridad" || !profile.especialidad) {
       setIsLoading(false);
       return;
     }
@@ -32,32 +65,97 @@ const ReportListScene = ({ status }: { status: "En espera" | "En progreso" | "Co
       reportesRef,
       where("tipo", "==", profile.especialidad),
       where("status", "==", status),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
+      limit(REPORTES_POR_PAGINA),
     );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const reportesData: Reporte[] = [];
-      querySnapshot.forEach((doc) => {
-        reportesData.push({ id: doc.id, ...doc.data() } as Reporte);
-      });
-      setReportes(reportesData);
-      setIsLoading(false);
-    }, (error) => {
-      console.error(`Error al obtener reportes [${status}]: `, error);
-      setIsLoading(false);
-    });
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+    }
 
-    return () => unsubscribe();
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const reportesData: Reporte[] = [];
+
+        querySnapshot.forEach((doc) => {
+          reportesData.push({ id: doc.id, ...doc.data() } as Reporte);
+        });
+
+        if (querySnapshot.docs.length > 0) {
+          lastDocRef.current =
+            querySnapshot.docs[querySnapshot.docs.length - 1];
+        } else {
+          lastDocRef.current = null;
+        }
+
+        setHasMoreData(querySnapshot.docs.length === REPORTES_POR_PAGINA);
+        setReportes(reportesData);
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error(`Error al obtener reportes [${status}]: `, error);
+        setIsLoading(false);
+      },
+    );
+
+    unsubscribeRef.current = unsubscribe;
+
+    return () => {
+      if (unsubscribeRef.current) unsubscribeRef.current();
+    };
   }, [profile, status]);
 
+  const fetchMoreData = async () => {
+    if (!hasMoreData || isFetchingMore || !lastDocRef.current || !profile)
+      return;
+
+    setIsFetchingMore(true);
+
+    try {
+      const reportesRef = collection(FIREBASE_DB, "reportes");
+      const nextQuery = query(
+        reportesRef,
+        where("tipo", "==", profile.especialidad),
+        where("status", "==", status),
+        orderBy("createdAt", "desc"),
+        startAfter(lastDocRef.current),
+        limit(REPORTES_POR_PAGINA),
+      );
+
+      const documentSnapshots = await getDocs(nextQuery);
+
+      if (documentSnapshots.empty) {
+        setHasMoreData(false);
+      } else {
+        const moreReportesData: Reporte[] = [];
+        documentSnapshots.forEach((doc) => {
+          moreReportesData.push({ id: doc.id, ...doc.data() } as Reporte);
+        });
+
+        lastDocRef.current =
+          documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        setHasMoreData(documentSnapshots.docs.length === REPORTES_POR_PAGINA);
+
+        setReportes((prevReportes) => [...prevReportes, ...moreReportesData]);
+      }
+    } catch (error) {
+      console.error("Error al cargar más reportes:", error);
+    } finally {
+      setIsFetchingMore(false);
+    }
+  };
+
   if (isLoading) {
-    return <ActivityIndicator style={styles.centered} size="large" color="#2f6feb" />;
+    return (
+      <ActivityIndicator style={styles.centered} size="large" color="#2f6feb" />
+    );
   }
 
   if (reportes.length === 0) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: '#888' }}>No hay reportes "{status}".</Text>
+        <Text style={{ color: "#888" }}>No hay reportes "{status}".</Text>
       </View>
     );
   }
@@ -73,7 +171,9 @@ const ReportListScene = ({ status }: { status: "En espera" | "En progreso" | "Co
           <Text style={styles.cardUser}>De: {item.userDisplayName}</Text>
         </View>
         <Image source={{ uri: item.imagenUrl }} style={styles.image} />
-        <Text style={styles.description} numberOfLines={2}>{item.descripcion}</Text>
+        <Text style={styles.description} numberOfLines={2}>
+          {item.descripcion}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -85,6 +185,17 @@ const ReportListScene = ({ status }: { status: "En espera" | "En progreso" | "Co
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.listContainer}
       showsVerticalScrollIndicator={false}
+      onEndReached={fetchMoreData}
+      onEndReachedThreshold={0.1}
+      ListFooterComponent={
+        isFetchingMore ? (
+          <ActivityIndicator
+            style={{ paddingVertical: 20 }}
+            size="small"
+            color="#2f6feb"
+          />
+        ) : null
+      }
     />
   );
 };
@@ -92,31 +203,31 @@ const ReportListScene = ({ status }: { status: "En espera" | "En progreso" | "Co
 const renderScene = SceneMap({
   espera: () => <ReportListScene status="En espera" />,
   progreso: () => <ReportListScene status="En progreso" />,
-  entregados: () => <ReportListScene status="Completado" />, 
+  entregados: () => <ReportListScene status="Completado" />,
 });
 
 export default function AutoridadHomeScreen() {
-  
   const layout = useWindowDimensions();
   const { profile } = useAuth();
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'espera', title: 'En Espera' },
-    { key: 'progreso', title: 'En Progreso' },
-    { key: 'entregados', title: 'Entregados' },
+    { key: "espera", title: "En Espera" },
+    { key: "progreso", title: "En Progreso" },
+    { key: "entregados", title: "Entregados" },
   ]);
 
-  if (!profile) return <ActivityIndicator style={styles.centered} size="large" />;
-  
-  if (profile.role !== 'autoridad') {
+  if (!profile)
+    return <ActivityIndicator style={styles.centered} size="large" />;
+
+  if (profile.role !== "autoridad") {
     return (
       <View style={styles.centered}>
         <Text>Acceso denegado.</Text>
       </View>
     );
   }
-  
+
   const renderTabBar = (props: any) => {
     return (
       <View style={styles.tabBarContainer}>
@@ -127,14 +238,16 @@ export default function AutoridadHomeScreen() {
               key={i}
               style={[
                 styles.tabItem,
-                isActive ? styles.tabItemActive : styles.tabItemInactive
+                isActive ? styles.tabItemActive : styles.tabItemInactive,
               ]}
               onPress={() => setIndex(i)}
             >
-              <Text style={[
-                styles.tabText,
-                isActive ? styles.tabTextActive : styles.tabTextInactive
-              ]}>
+              <Text
+                style={[
+                  styles.tabText,
+                  isActive ? styles.tabTextActive : styles.tabTextInactive,
+                ]}
+              >
                 {route.title}
               </Text>
             </TouchableOpacity>
@@ -146,9 +259,8 @@ export default function AutoridadHomeScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f4f4f8" /> 
-      <View style={styles.headerContainer}>
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor="#f4f4f8" />
+      <View style={styles.headerContainer}></View>
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
@@ -163,23 +275,23 @@ export default function AutoridadHomeScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   headerContainer: {
     paddingHorizontal: 20,
     paddingTop: 15,
     paddingBottom: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: "700",
+    color: "#000",
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   listContainer: {
     paddingHorizontal: 20,
@@ -187,68 +299,68 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   tabBarContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 20,
     marginBottom: 10,
     gap: 10,
-},
+  },
   tabItem: {
-    flex: 1,             
+    flex: 1,
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 1,
-    alignItems: 'center',
-},
+    alignItems: "center",
+  },
   tabItemActive: {
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
+    backgroundColor: "#fff",
+    borderColor: "#ccc",
   },
   tabItemInactive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: "#007AFF",
+    borderColor: "#007AFF",
   },
   tabText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   tabTextActive: {
-    color: '#333',
+    color: "#333",
   },
   tabTextInactive: {
-    color: '#fff',
+    color: "#fff",
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 15,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: "#e0e0e0",
   },
   cardHeader: {
     marginBottom: 8,
   },
   cardType: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
     marginBottom: 2,
   },
   cardUser: {
     fontSize: 14,
-    color: '#444',
+    color: "#444",
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 180,
-    borderRadius: 12, 
+    borderRadius: 12,
     marginVertical: 5,
-    backgroundColor: '#eee', 
+    backgroundColor: "#eee",
   },
   description: {
     fontSize: 13,
-    color: '#333',
+    color: "#333",
     marginTop: 8,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

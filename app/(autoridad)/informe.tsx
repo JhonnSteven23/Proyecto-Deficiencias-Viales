@@ -5,57 +5,14 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import {ActivityIndicator,Alert,Dimensions,ScrollView,StyleSheet,Text,TouchableOpacity,View,} from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { BarChart } from "react-native-chart-kit";
 
 LocaleConfig.locales["es"] = {
-  monthNames: [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ],
-  monthNamesShort: [
-    "Ene.",
-    "Feb.",
-    "Mar.",
-    "Abr.",
-    "May.",
-    "Jun.",
-    "Jul.",
-    "Ago.",
-    "Sep.",
-    "Oct.",
-    "Nov.",
-    "Dic.",
-  ],
-  dayNames: [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-  ],
+  monthNames: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",],
+  monthNamesShort: ["Ene.","Feb.","Mar.","Abr.","May.","Jun.","Jul.","Ago.","Sep.","Oct.","Nov.","Dic.",],
+  dayNames: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado",],
   dayNamesShort: ["Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb."],
   today: "Hoy",
 };
@@ -94,15 +51,7 @@ function formatDuration(ms: number): string {
   return `${minutos.toFixed(0)} min`;
 }
 
-const BigStatCard = ({
-  title,
-  value,
-  color = "#007AFF",
-}: {
-  title: string;
-  value: number;
-  color?: string;
-}) => (
+const BigStatCard = ({title,value,color = "#007AFF",}: {title: string;value: number;color?: string;}) => (
   <View style={[styles.bigCard, { borderColor: color }]}>
     <Text style={[styles.bigCardValue, { color }]}>{value}</Text>
     <Text style={[styles.bigCardTitle, { color }]}>{title}</Text>
@@ -280,20 +229,7 @@ export default function InformeScreen() {
   }, [profile]);
 
   const chartData = useMemo(() => {
-    const months = [
-      "Ene",
-      "Feb",
-      "Mar",
-      "Abr",
-      "May",
-      "Jun",
-      "Jul",
-      "Ago",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dic",
-    ];
+    const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic",];
     const data = new Array(12).fill(0);
 
     reportes.forEach((r) => {
