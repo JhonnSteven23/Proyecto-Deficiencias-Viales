@@ -47,14 +47,23 @@ export const notificarAutoridadNuevoReporte = onDocumentCreated(
       return;
     }
     logger.info(`Nuevo reporte creado: ${reporteId}. Tipo: ${tipoReporte}`);
+
     const autoridadesRef = db.collection("users");
-    const q = autoridadesRef
-      .where("role", "==", "autoridad")
-      .where("especialidad", "==", tipoReporte);
+
+    let q;
+    if (tipoReporte === "Otro") {
+      q = autoridadesRef.where("role", "==", "autoridad");
+    } else {
+      q = autoridadesRef
+        .where("role", "==", "autoridad")
+        .where("especialidad", "==", tipoReporte);
+    }
 
     const querySnapshot = await q.get();
     if (querySnapshot.empty) {
-      logger.warn(`No se encontraron autoridades para el tipo: ${tipoReporte}`);
+      logger.warn(
+        `No se encontraron autoridades para notificar el tipo: ${tipoReporte}`,
+      );
       return;
     }
     const tokens: string[] = [];

@@ -61,9 +61,10 @@ const ReportListScene = ({
     }
 
     const reportesRef = collection(FIREBASE_DB, "reportes");
+
     const q = query(
       reportesRef,
-      where("tipo", "==", profile.especialidad),
+      where("tipo", "in", [profile.especialidad, "Otro"]),
       where("status", "==", status),
       orderBy("createdAt", "desc"),
       limit(REPORTES_POR_PAGINA),
@@ -114,9 +115,10 @@ const ReportListScene = ({
 
     try {
       const reportesRef = collection(FIREBASE_DB, "reportes");
+
       const nextQuery = query(
         reportesRef,
-        where("tipo", "==", profile.especialidad),
+        where("tipo", "in", [profile.especialidad, "Otro"]),
         where("status", "==", status),
         orderBy("createdAt", "desc"),
         startAfter(lastDocRef.current),
@@ -273,31 +275,16 @@ export default function AutoridadHomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  mainContainer: { flex: 1, backgroundColor: "#fff" },
   headerContainer: {
     paddingHorizontal: 20,
     paddingTop: 15,
     paddingBottom: 10,
     backgroundColor: "#fff",
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#000",
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  listContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
+  headerTitle: { fontSize: 18, fontWeight: "700", color: "#000" },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
+  listContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
   tabBarContainer: {
     flexDirection: "row",
     paddingHorizontal: 20,
@@ -311,24 +298,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
   },
-  tabItemActive: {
-    backgroundColor: "#fff",
-    borderColor: "#ccc",
-  },
-  tabItemInactive: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
-  },
-  tabText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  tabTextActive: {
-    color: "#333",
-  },
-  tabTextInactive: {
-    color: "#fff",
-  },
+  tabItemActive: { backgroundColor: "#fff", borderColor: "#ccc" },
+  tabItemInactive: { backgroundColor: "#007AFF", borderColor: "#007AFF" },
+  tabText: { fontSize: 13, fontWeight: "600" },
+  tabTextActive: { color: "#333" },
+  tabTextInactive: { color: "#fff" },
   card: {
     backgroundColor: "white",
     borderRadius: 20,
@@ -337,19 +311,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
-  cardHeader: {
-    marginBottom: 8,
-  },
+  cardHeader: { marginBottom: 8 },
   cardType: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#000",
     marginBottom: 2,
   },
-  cardUser: {
-    fontSize: 14,
-    color: "#444",
-  },
+  cardUser: { fontSize: 14, color: "#444" },
   image: {
     width: "100%",
     height: 180,
@@ -357,10 +326,5 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     backgroundColor: "#eee",
   },
-  description: {
-    fontSize: 13,
-    color: "#333",
-    marginTop: 8,
-    fontWeight: "500",
-  },
+  description: { fontSize: 13, color: "#333", marginTop: 8, fontWeight: "500" },
 });
