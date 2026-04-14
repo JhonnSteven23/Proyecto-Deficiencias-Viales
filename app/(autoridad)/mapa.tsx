@@ -27,6 +27,10 @@ const IconoBacheVerde = require("../../assets/images/Bache_Verde.png");
 const IconoAlcantarillaVerde = require("../../assets/images/Alcantarilla_Verde.png");
 const IconoPosteVerde = require("../../assets/images/Poste_Verde.png");
 
+const IconoOtroRojo = require("../../assets/images/Otro_Rojo.png");
+const IconoOtroAmarillo = require("../../assets/images/Otro_Amarillo.png");
+const IconoOtroVerde = require("../../assets/images/Otro_Verde.png");
+
 const IconoDefault = require("../../assets/images/icon.png");
 
 interface Reporte {
@@ -65,6 +69,8 @@ export default function MapaAutoridadScreen() {
           return IconoAlcantarillaRojo;
         case "poste":
           return IconoPosteRojo;
+        case "otro":
+          return IconoOtroRojo;
         default:
           return IconoDefault;
       }
@@ -76,6 +82,8 @@ export default function MapaAutoridadScreen() {
           return IconoAlcantarillaAmarillo;
         case "poste":
           return IconoPosteAmarillo;
+        case "otro":
+          return IconoOtroAmarillo;
         default:
           return IconoDefault;
       }
@@ -87,6 +95,8 @@ export default function MapaAutoridadScreen() {
           return IconoAlcantarillaVerde;
         case "poste":
           return IconoPosteVerde;
+        case "otro":
+          return IconoOtroVerde;
         default:
           return IconoDefault;
       }
@@ -126,29 +136,60 @@ export default function MapaAutoridadScreen() {
       : ["En espera", "En progreso"];
 
     const reportesRef = collection(FIREBASE_DB, "reportes");
-    const q = query(
+
+    const qEspecialidad = query(
       reportesRef,
       where("tipo", "==", profile.especialidad),
       where("status", "in", estadosAFiltrar),
     );
 
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const fetchedReportes: Reporte[] = [];
-        querySnapshot.forEach((doc) => {
-          fetchedReportes.push({ id: doc.id, ...doc.data() } as Reporte);
-        });
-        setReportes(fetchedReportes);
-        setIsLoadingReports(false);
+    const qOtro = query(
+      reportesRef,
+      where("tipo", "==", "Otro"),
+      where("status", "in", estadosAFiltrar),
+    );
+
+    let reportesEspecialidad: Reporte[] = [];
+    let reportesOtro: Reporte[] = [];
+
+    const actualizarReportes = () => {
+      const consolidados = [...reportesEspecialidad, ...reportesOtro];
+      setReportes(consolidados);
+      setIsLoadingReports(false);
+    };
+
+    const unsubscribeEspecialidad = onSnapshot(
+      qEspecialidad,
+      (snapshot) => {
+        reportesEspecialidad = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Reporte,
+        );
+        actualizarReportes();
       },
       (error) => {
-        console.error("Error reportes mapa: ", error);
+        console.error("Error reportes mapa (Especialidad): ", error);
         setIsLoadingReports(false);
       },
     );
 
-    return () => unsubscribe();
+    const unsubscribeOtro = onSnapshot(
+      qOtro,
+      (snapshot) => {
+        reportesOtro = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as Reporte,
+        );
+        actualizarReportes();
+      },
+      (error) => {
+        console.error("Error reportes mapa (Otro): ", error);
+        setIsLoadingReports(false);
+      },
+    );
+
+    return () => {
+      unsubscribeEspecialidad();
+      unsubscribeOtro();
+    };
   }, [profile, showResolved]);
 
   useEffect(() => {
