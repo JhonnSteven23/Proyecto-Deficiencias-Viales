@@ -1,9 +1,27 @@
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import {arrayUnion,doc,getDoc,serverTimestamp,updateDoc,} from "firebase/firestore";
+import {
+  arrayUnion,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import React, { useEffect, useState } from "react";
-import {ActivityIndicator,Alert,Button,Image,Modal,ScrollView,StyleSheet,Text,TextInput,View,} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Button,
+  Image,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { Rating } from "react-native-ratings";
 import uuid from "react-native-uuid";
@@ -43,23 +61,39 @@ export default function AutoridadReporteDetalle() {
   const [reporte, setReporte] = useState<Reporte | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchReporte = async () => {
-    if (!reporteId) return;
-    setIsLoading(true);
-    const docRef = doc(FIREBASE_DB, "reportes", reporteId as string);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      setReporte({ id: docSnap.id, ...docSnap.data() } as Reporte);
-    } else {
-      console.log("No se encontró el reporte.");
-    }
-    setIsLoading(false);
-  };
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchReporte();
+    if (!reporteId) return;
+    setIsLoading(true);
+
+    const docRef = doc(FIREBASE_DB, "reportes", reporteId as string);
+
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setReporte({ id: docSnap.id, ...docSnap.data() } as Reporte);
+        } else {
+          console.log("No se encontró el reporte.");
+        }
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Error al escuchar el documento: ", error);
+        setIsLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
   }, [reporteId]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
 
   const handleActualizar = async (nuevoStatus: string, extraData: any = {}) => {
     if (!reporte || !profile) return;
@@ -85,10 +119,11 @@ export default function AutoridadReporteDetalle() {
     try {
       await updateDoc(reporteDocRef, updateData);
       Alert.alert("Éxito", `El reporte ha sido marcado como "${nuevoStatus}".`);
+
       if (nuevoStatus === "Completado" || nuevoStatus === "Rechazado") {
         router.back();
       } else {
-        await fetchReporte();
+        setIsLoading(false);
       }
     } catch (error) {
       setIsLoading(false);
@@ -172,7 +207,7 @@ export default function AutoridadReporteDetalle() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !reporte) {
     return <ActivityIndicator size="large" style={styles.centered} />;
   }
 
@@ -200,7 +235,12 @@ export default function AutoridadReporteDetalle() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Stack.Screen options={{ title: `Reporte: ${reporte.tipo}` }} />
       <Image source={{ uri: reporte.imagenUrl }} style={styles.image} />
 

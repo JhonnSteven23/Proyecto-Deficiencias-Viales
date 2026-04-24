@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -79,6 +80,7 @@ export default function AdminEditUserScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f4f4f8" />
       <View style={styles.headerContainer}>
         <Text style={styles.name}>{profile.displayName}</Text>
         <Text style={styles.email}>{profile.email}</Text>

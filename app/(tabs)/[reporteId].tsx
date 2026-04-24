@@ -1,18 +1,34 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Button, Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import { Rating } from 'react-native-ratings';
-import { FIREBASE_DB } from '../../services/firebase';
+import { Stack, useLocalSearchParams } from "expo-router";
+import {
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Button,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { Rating } from "react-native-ratings";
+import { FIREBASE_DB } from "../../services/firebase";
 
 export interface Reporte {
-  id: string; 
-  tipo: 'Bache' | 'Alcantarilla' | 'Poste';
+  id: string;
+  tipo: "Bache" | "Alcantarilla" | "Poste";
   descripcion: string;
-  imagenUrl: string; 
+  imagenUrl: string;
   status: string;
-  createdAt: any; 
+  createdAt: any;
   ubicacion: {
     latitude: number;
     longitude: number;
@@ -28,15 +44,15 @@ export interface Reporte {
     timestamp: any;
     userId: string;
   }[];
-  
+
   razonRechazo?: string;
-  imagenSolucionUrl?: string; 
-  
+  imagenSolucionUrl?: string;
+
   feedback?: {
     rating: number;
     comentario: string;
     createdAt: any;
-  }
+  };
 }
 
 export default function ReporteDetalleScreen() {
@@ -44,33 +60,50 @@ export default function ReporteDetalleScreen() {
 
   const [reporte, setReporte] = useState<Reporte | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [rating, setRating] = useState(0);
-  const [comentarioFeedback, setComentarioFeedback] = useState('');
+  const [comentarioFeedback, setComentarioFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
-  const fetchReporte = async () => {
+  useEffect(() => {
     if (!reporteId) return;
     setIsLoading(true);
+
     const docRef = doc(FIREBASE_DB, "reportes", reporteId as string);
-    const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      setReporte({ id: docSnap.id, ...docSnap.data() } as Reporte);
-    } else {
-      console.log("No se encontró el reporte.");
-    }
-    setIsLoading(false);
-  };
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setReporte({ id: docSnap.id, ...docSnap.data() } as Reporte);
+        } else {
+          console.log("No se encontró el reporte.");
+        }
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Error al escuchar el documento: ", error);
+        setIsLoading(false);
+      },
+    );
 
-  useEffect(() => {
-    fetchReporte();
+    return () => unsubscribe();
   }, [reporteId]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
 
   const handleEnviarCalificacion = async () => {
     if (rating === 0) {
-      Alert.alert("Error", "Por favor, selecciona una calificación (mínimo 1 estrella).");
+      Alert.alert(
+        "Error",
+        "Por favor, selecciona una calificación (mínimo 1 estrella).",
+      );
       return;
     }
     if (!reporte) return;
@@ -83,10 +116,9 @@ export default function ReporteDetalleScreen() {
           rating: rating,
           comentario: comentarioFeedback.trim(),
           createdAt: serverTimestamp(),
-        }
+        },
       });
       Alert.alert("¡Gracias!", "Tu calificación ha sido enviada.");
-      await fetchReporte();
     } catch (error) {
       console.error("Error al enviar calificación: ", error);
       Alert.alert("Error", "No se pudo enviar tu calificación.");
@@ -94,7 +126,6 @@ export default function ReporteDetalleScreen() {
       setIsSubmitting(false);
     }
   };
-
 
   if (isLoading) {
     return <ActivityIndicator size="large" style={styles.centered} />;
@@ -110,49 +141,76 @@ export default function ReporteDetalleScreen() {
 
   const getStatusColor = () => {
     switch (reporte.status) {
-      case 'En espera': return '#D9534F';
-      case 'En progreso': return '#F0AD4E';
-      case 'Completado': return '#5CB85C';
-      case 'Rechazado': return '#777'; 
-      default: return '#777';
+      case "En espera":
+        return "#D9534F";
+      case "En progreso":
+        return "#F0AD4E";
+      case "Completado":
+        return "#5CB85C";
+      case "Rechazado":
+        return "#777";
+      default:
+        return "#777";
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Stack.Screen options={{ title: "Detalle del Reporte" }} />
 
       <Image source={{ uri: reporte.imagenUrl }} style={styles.image} />
-      
+
       <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Resumen del Reporte</Text>
-          <Text style={styles.cardRow}><Text style={styles.label}>Tipo: </Text>{reporte.tipo}</Text>
+          <Text style={styles.cardRow}>
+            <Text style={styles.label}>Tipo: </Text>
+            {reporte.tipo}
+          </Text>
           <Text style={styles.cardRow}>
             <Text style={styles.label}>Estado: </Text>
-            <Text style={{ color: getStatusColor(), fontWeight: 'bold' }}>
+            <Text style={{ color: getStatusColor(), fontWeight: "bold" }}>
               {reporte.status}
             </Text>
           </Text>
-          <Text style={styles.cardRow}><Text style={styles.label}>Fecha: </Text>{reporte.createdAt?.toDate().toLocaleDateString()}</Text>
+          <Text style={styles.cardRow}>
+            <Text style={styles.label}>Fecha: </Text>
+            {reporte.createdAt?.toDate().toLocaleDateString()}
+          </Text>
         </View>
 
-        {(reporte.status === 'Rechazado' || reporte.status === 'Completado') && (
-          <View style={[styles.card, reporte.status === 'Rechazado' ? styles.cardRechazado : styles.cardCompletado]}>
+        {(reporte.status === "Rechazado" ||
+          reporte.status === "Completado") && (
+          <View
+            style={[
+              styles.card,
+              reporte.status === "Rechazado"
+                ? styles.cardRechazado
+                : styles.cardCompletado,
+            ]}
+          >
             <Text style={styles.cardTitle}>Respuesta de la Autoridad</Text>
-            
-            {reporte.status === 'Rechazado' && reporte.razonRechazo && (
+
+            {reporte.status === "Rechazado" && reporte.razonRechazo && (
               <>
                 <Text style={styles.label}>Razón del Rechazo:</Text>
                 <Text>{reporte.razonRechazo}</Text>
               </>
             )}
 
-            {reporte.status === 'Completado' && (
+            {reporte.status === "Completado" && (
               <>
                 <Text style={styles.label}>Evidencia de Solución:</Text>
                 {reporte.imagenSolucionUrl ? (
-                  <Image source={{ uri: reporte.imagenSolucionUrl }} style={styles.solucionImage} />
+                  <Image
+                    source={{ uri: reporte.imagenSolucionUrl }}
+                    style={styles.solucionImage}
+                  />
                 ) : (
                   <Text>El trabajo fue marcado como completado.</Text>
                 )}
@@ -160,7 +218,7 @@ export default function ReporteDetalleScreen() {
             )}
           </View>
         )}
-        
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Descripción</Text>
           <Text>{reporte.descripcion}</Text>
@@ -176,7 +234,7 @@ export default function ReporteDetalleScreen() {
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
-            scrollEnabled={false} 
+            scrollEnabled={false}
           >
             <Marker coordinate={reporte.ubicacion} />
           </MapView>
@@ -206,7 +264,8 @@ export default function ReporteDetalleScreen() {
                   <View>
                     <Text style={styles.logStatus}>{log.status}</Text>
                     <Text style={styles.logTimestamp}>
-                      {log.timestamp?.toDate().toLocaleDateString()} - {log.timestamp?.toDate().toLocaleTimeString()}
+                      {log.timestamp?.toDate().toLocaleDateString()} -{" "}
+                      {log.timestamp?.toDate().toLocaleTimeString()}
                     </Text>
                   </View>
                 </View>
@@ -214,10 +273,10 @@ export default function ReporteDetalleScreen() {
           </View>
         )}
 
-        {reporte.status === 'Completado' && (
+        {reporte.status === "Completado" && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Calificación del Trabajo</Text>
-            
+
             {reporte.feedback ? (
               <View>
                 <Text style={styles.label}>Tu Calificación:</Text>
@@ -225,7 +284,7 @@ export default function ReporteDetalleScreen() {
                   imageSize={20}
                   readonly
                   startingValue={reporte.feedback.rating}
-                  style={{ paddingVertical: 10, alignSelf: 'flex-start' }}
+                  style={{ paddingVertical: 10, alignSelf: "flex-start" }}
                 />
                 {reporte.feedback.comentario && (
                   <>
@@ -236,7 +295,9 @@ export default function ReporteDetalleScreen() {
               </View>
             ) : (
               <View>
-                <Text style={styles.cardRow}>¿Qué tan satisfecho estás con la solución?</Text>
+                <Text style={styles.cardRow}>
+                  ¿Qué tan satisfecho estás con la solución?
+                </Text>
                 <Rating
                   imageSize={30}
                   showRating
@@ -251,16 +312,15 @@ export default function ReporteDetalleScreen() {
                   multiline
                   maxLength={300}
                 />
-                <Button 
+                <Button
                   title={isSubmitting ? "Enviando..." : "Enviar Calificación"}
-                  onPress={handleEnviarCalificacion} 
+                  onPress={handleEnviarCalificacion}
                   disabled={isSubmitting}
                 />
               </View>
             )}
           </View>
         )}
-
       </View>
     </ScrollView>
   );
@@ -269,19 +329,19 @@ export default function ReporteDetalleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 300,
   },
   solucionImage: {
-    width: '100%',
+    width: "100%",
     height: 250,
     borderRadius: 8,
     marginTop: 10,
@@ -290,24 +350,24 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 8,
     padding: 15,
     marginBottom: 15,
   },
   cardRechazado: {
-    backgroundColor: '#fff0f0',
-    borderColor: '#D9534F',
+    backgroundColor: "#fff0f0",
+    borderColor: "#D9534F",
     borderWidth: 1,
   },
   cardCompletado: {
-    backgroundColor: '#f0fff0',
-    borderColor: '#5CB85C',
+    backgroundColor: "#f0fff0",
+    borderColor: "#5CB85C",
     borderWidth: 1,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   cardRow: {
@@ -315,38 +375,38 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   label: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   map: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 8,
   },
   feedbackInput: {
     height: 100,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     borderRadius: 8,
     padding: 10,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     marginVertical: 15,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: "#e0e0e0",
   },
   logEntry: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   logStatus: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   logTimestamp: {
     fontSize: 12,
-    color: 'gray',
+    color: "gray",
   },
 });
